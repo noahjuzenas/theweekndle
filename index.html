@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Weekndle</title>
+  <link rel="stylesheet" href="weekndle.css" />
+</head>
+<body>
+  <header>
+    <h1>The Weekndle</h1>
+    <div class="header-controls">
+      <button id="howToPlayBtn">How to Play</button>
+      <div id="countdown"></div>
+    </div>
+  </header>
+
+  <main id="game">
+    <div class="autocomplete">
+      <input id="guessInput" placeholder="Enter song title" autocomplete="off" />
+    </div>
+    <button id="guessBtn" onclick="submitGuess()">Guess</button>
+    <button id="seeResultsBtn" style="display:none;">See results</button>
+
+    <div id="feedback"></div>
+
+    <table id="guessesTable">
+      <colgroup>
+        <col class="col-guess" />
+        <col class="col-song" />
+        <col class="col-album" />
+        <col class="col-track" />
+        <col class="col-duration" />
+        <col class="col-streams" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Song</th>
+          <th>Album</th>
+          <th>Track</th>
+          <th>Duration</th>
+          <th>Streams</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </main>
+
+  <!-- Correct Overlay -->
+  <div id="winOverlay" class="overlay" style="display:none;">
+    <div class="overlay-card correct-card">
+      <h2>Correct!</h2>
+      <img id="albumCover" src="" alt="Album Cover" />
+      <p id="winSongTitle"></p>
+      <p class="comeBackText">Come back tomorrow!</p>
+      <div id="playerStats">
+        <p>Number of plays: <span id="statPlays">0</span></p>
+        <p>Win %: <span id="statWinPct">0</span>%</p>
+        <p>Current streak: <span id="statCurrentStreak">0</span></p>
+        <p>Max streak: <span id="statMaxStreak">0</span></p>
+      </div>
+      <h3 class="gd-heading">Guess distribution:</h3>
+      <div id="guessDist"></div>
+
+      <button id="shareScoreBtn">Share Score</button>
+      <button id="closeWinBtn" onclick="closeWinOverlay()">Close</button>
+    </div>
+  </div>
+
+  <!-- Loss Overlay -->
+  <div id="lossOverlay" class="overlay" style="display:none;">
+    <div class="overlay-card">
+      <h2>Out of guesses</h2>
+      <img id="lossAlbumCover" src="" alt="Album Cover" />
+      <p id="lossSongTitle" class="loss-song"></p>
+      <p class="comeBackText">Come back tomorrow!</p>
+
+      <h3 class="gd-heading">Guess distribution</h3>
+      <div id="guessDistLoss"></div>
+
+      <div class="actions" style="margin-top:12px;">
+        <button id="shareLossBtn">Share Score</button>
+        <button id="closeLossBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- How To Play Overlay -->
+  <div id="howToPlayOverlay" class="overlay" style="display:none;">
+    <div class="overlay-card">
+      <h2>How to Play:</h2>
+      <div class="how-to-directions">
+        <p>Goal: Guess the correct Weeknd song in 8 guesses or less.</p>
+        <ul>
+          <li>Green in any column means exact match.</li>
+          <li>Album: Yellow means the correct song within ±2 albums in the discography.</li>
+          <li>Track number: Yellow means the correct song is within ±2 tracks in the album.</li>
+          <li>Duration: Yellow means the correct song is ±30 seconds in length.</li>
+          <li>Streams: Only show more or less; no yellow option.</li>
+          <li>Streams are collected from spotify.</li>
+          <li>Twenty Eight, Valerie, and Till Dawn each count as the 10th track on their respective mixtapes.</li>
+          <li>No deluxe tracks from Starboy or After Hours are counted.</li>
+          <li>Good luck!</li>
+        </ul>
+      </div>
+      <div class="how-to-albums">
+        <img src="AlbumArts/HouseOfBalloons.jpg" alt="House of Balloons" />
+        <img src="AlbumArts/Thursday.jpg" alt="Thursday" />
+        <img src="AlbumArts/EchoesOfSilence.jpg" alt="Echoes of Silence" />
+        <img src="AlbumArts/KissLand.jpg" alt="Kiss Land" />
+        <img src="AlbumArts/BBTM.jpg" alt="Beauty Behind the Madness" />
+        <img src="AlbumArts/Starboy.jpg" alt="Starboy" />
+        <img src="AlbumArts/MDM.jpg" alt="My Dear Melancholy," />
+        <img src="AlbumArts/AfterHours.jpg" alt="After Hours" />
+        <img src="AlbumArts/DawmFm.jpg" alt="Dawn FM" />
+        <img src="AlbumArts/HUT.jpg" alt="Hurry Up Tomorrow" />
+      </div>
+      <button id="closeHowTo">Close</button>
+    </div>
+  </div>
+
+  <div id="footerLinks">
+  <a id="aboutLink" href="#">About</a>
+  <a id="privacyLink" href="#">Privacy Policy</a>
+  <a href="https://docs.google.com/forms/d/e/1FAIpQLSf0ALEodYpXB_VPUthCaVUqP4ILj0zRxVGQFdZZpt1lp88LuQ/viewform?usp=dialog" target="_blank" rel="noopener">Suggestions</a>
+  <a href="https://yeezle.xyz/" target="_blank" rel="noopener">Inspiration: Yeezle</a>
+</div>
+
+  <script src="weekndle.js"></script>
+
+  <!-- About modal -->
+<div id="aboutOverlay" class="overlay" style="display:none;">
+  <div class="overlay-card" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
+    <h2 id="aboutTitle">About Weekndle</h2>
+    <p><strong>Weekndle</strong> is a fan-made, Wordle-inspired game where players guess a song by The Weeknd in 8 tries or less.</p>
+    <p>The project was created out of passion for music, games, and The Weeknd’s artistry. It is not affiliated with The Weeknd, his label, or Yeezle, but was inspired by their work.</p>
+    <p>Each day, players get one new puzzle. Stats are tracked locally on your device so you can keep up with your streaks.</p>
+    <p>If you have feedback or ideas, you can share them via the
+      <a href="https://docs.google.com/forms/d/e/1FAIpQLSf0ALEodYpXB_VPUthCaVUqP4ILj0zRxVGQFdZZpt1lp88LuQ/viewform?usp=dialog" target="_blank" rel="noopener">Suggestions form</a>.
+    </p>
+    <button id="aboutCloseBtn">Close</button>
+  </div>
+</div>
+
+<!-- Privacy modal -->
+<div id="privacyOverlay" class="overlay" style="display:none;">
+  <div class="overlay-card" role="dialog" aria-modal="true" aria-labelledby="privacyTitle">
+    <h2 id="privacyTitle">Privacy Policy</h2>
+    <p>Weekndle respects your privacy. This game is a simple browser-based experience and does not collect personal data directly.</p>
+
+    <h3>Local Data</h3>
+    <p>Your game statistics (streaks, wins, losses) are stored locally on your device using your browser’s local storage. This data never leaves your device.</p>
+
+    <h3>Third-Party Services</h3>
+    <p>If advertising (e.g., Google AdSense) is added in the future, those services may use cookies or similar technologies to serve relevant ads. You can control or disable cookies in your browser settings.</p>
+
+    <h3>Feedback</h3>
+    <p>Feedback is collected through our
+      <a href="https://docs.google.com/forms/d/e/1FAIpQLSf0ALEodYpXB_VPUthCaVUqP4ILj0zRxVGQFdZZpt1lp88LuQ/viewform?usp=dialog" target="_blank" rel="noopener">Google Form</a>. Responses are voluntary and handled by Google Forms.
+    </p>
+
+    <h3>Contact</h3>
+    <p>If you have questions about this policy, please reach out through the Suggestions form above.</p>
+
+    <button id="privacyCloseBtn">Close</button>
+  </div>
+</div>
+
+</body>
+</html>

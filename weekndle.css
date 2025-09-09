@@ -1,0 +1,128 @@
+/* Base */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #111;
+  color: #fff;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+
+header {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-bottom: 1px solid #333;
+}
+
+header h1 {
+  margin: 0;
+  text-align: center;
+  font-size: 3em;
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-top: 10px;
+}
+
+input { padding: 8px; font-size: 16px; }
+
+button {
+  padding: 8px 12px;
+  font-size: 16px;
+  margin-left: 4px;
+  cursor: pointer;
+  background-color: #1db954;
+  border: none;
+  border-radius: 5px;
+  color: #fff;
+}
+
+/* Table */
+table { margin: 20px auto; border-collapse: collapse; width: 90%; }
+th, td { padding: 10px; border: 1px solid #333; text-align: center; font-weight: bold; vertical-align: middle; }
+th img, td img { vertical-align: middle; }
+
+.green { background-color: #4CAF50; color: #fff; }
+.yellow { background-color: #FFEB3B; color: #000; }
+.gray   { background-color: #555;    color: #fff; }
+
+/* Autocomplete */
+.autocomplete { position: relative; display: inline-block; }
+.autocomplete-items { position: absolute; border: 1px solid #555; z-index: 99; top: 100%; left: 0; right: 0; background: #111; max-height: 150px; overflow-y: auto; }
+.autocomplete-items div { padding: 8px; cursor: pointer; color: #fff; }
+.autocomplete-items div:hover { background-color: #333; }
+.autocomplete-active { background-color: #4CAF50 !important; color: #fff; }
+
+/* Overlays */
+.overlay { position: fixed; display: none; inset: 0; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 1000; }
+.overlay-card { background: #222; padding: 20px; border-radius: 10px; text-align: center; width: 300px; }
+.overlay-card img#albumCover, #lossAlbumCover { width: 80%; max-width: 400px; height: auto; display: block; margin: 15px auto; border-radius: 10px; }
+
+/* How To Play */
+#howToPlayOverlay .overlay-card { width: 960px; max-width: 95vw; padding: 30px; text-align: left; }
+.how-to-directions { margin-bottom: 20px; }
+.how-to-directions ul { padding-left: 20px; }
+.how-to-albums { display: flex; flex-wrap: nowrap; justify-content: center; gap: 10px; }
+.how-to-albums img { width: 60px; height: 60px; object-fit: cover; border-radius: 5px; border: 1px solid #333; }
+
+/* Guess Table layout stability */
+#guessesTable { table-layout: fixed; width: 90%; }
+#guessesTable th, #guessesTable td { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#guessesTable .col-guess { width: 4%; }
+#guessesTable .col-song { width: 36%; }
+#guessesTable .col-album { width: 30%; }
+#guessesTable .col-track { width: 8%; }
+#guessesTable .col-duration { width: 10%; }
+#guessesTable .col-streams { width: 12%; }
+#guessesTable th:first-child, #guessesTable td:first-child { padding-left: 4px; padding-right: 4px; }
+
+/* Album cell: big cover left + text */
+:root { --guess-row-h: 64px; }
+#guessesTable tbody tr { height: var(--guess-row-h); }
+#guessesTable td.album-cell { padding-top: 0; padding-bottom: 0; display: grid; grid-template-columns: var(--guess-row-h) 1fr; align-items: center; gap: 8px; padding-left: 0; }
+#guessesTable td.album-cell img { width: var(--guess-row-h); height: var(--guess-row-h); object-fit: cover; display: block; justify-self: start; margin-left: 0; }
+.album-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+@media (max-width: 480px) { :root { --guess-row-h: 52px; } }
+
+/* Guess distribution */
+.gd-heading { margin: 16px 0 8px; font-size: 1.1em; font-weight: 600; }
+#guessDist .gd-row { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
+#guessDist .gd-num { width: 20px; text-align: right; opacity: .8; }
+#guessDist .gd-bar { flex: 1; height: 14px; background: #333; border-radius: 6px; overflow: hidden; }
+#guessDist .gd-bar > div { height: 100%; background: #1db954; text-align: right; padding-right: 6px; font-size: 12px; line-height: 14px; }
+
+/* Highlight entire winning row */
+#guessesTable tr.win-row td { background-color: #4CAF50 !important; color: #fff !important; }
+
+/* Scroll lock when modal open */
+body.modal-open { overflow: hidden; }
+
+/* Footer links stack in bottom-right */
+#footerLinks {
+  position: fixed;
+  right: 14px;
+  bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  font-size: 14px;
+  z-index: 10;
+}
+
+#footerLinks a {
+  color: #aab8af;
+  text-decoration: none;
+  opacity: 0.9;
+}
+
+#footerLinks a:hover {
+  text-decoration: underline;
+  opacity: 1;
+}
