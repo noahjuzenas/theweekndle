@@ -1,7 +1,8 @@
-// ---------------------------
+// weekndle.js — rewritten for deterministic daily song (same for everyone)
+
+// ===========================
 // SONG DATABASE
-// ---------------------------
-// (unchanged content; only formatting kept intact)
+// ===========================
 const songs = [
   //House Of Balloons//
   { title: "High For This", album: "House Of Balloons", track: 1, duration: 249, streams: 390000000, cover: "AlbumArts/HouseOfBalloons.jpg" },
@@ -146,7 +147,7 @@ const songs = [
   { title: "Hurry Up Tomorrow", album: "Hurry Up Tomorrow", track: 22, duration: 291, streams: 30000000, cover: "AlbumArts/HUT.jpg" },
 ];
 
-// Album order map (for ±2 album "yellow" logic)
+// Album order (for ±2 “yellow” logic)
 const albumOrderMap = {
   "House Of Balloons": 1,
   "Thursday": 2,
@@ -160,96 +161,111 @@ const albumOrderMap = {
   "Hurry Up Tomorrow": 10,
 };
 
-// ---------------------------
+// ===========================
 // HELPERS
-// ---------------------------
+// ===========================
 const $ = (id) => document.getElementById(id);
-function formatDuration(seconds) { const m = Math.floor(seconds / 60); const s = seconds % 60; return `${m}:${s.toString().padStart(2, "0")}`; }
-function shuffleArray(array) { const arr = [...array]; for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; }
-function isTestMode() { return new URLSearchParams(location.search).has("test"); }
+function formatDuration(seconds){ const m = Math.floor(seconds/60); const s = seconds % 60; return `${m}:${s.toString().padStart(2,"0")}`; }
+function isTestMode(){ return new URLSearchParams(location.search).has("test"); }
 
-// ---------------------------
-// DAILY SONG LOGIC
-// ---------------------------
-const SONG_ORDER_KEY = "weekndle_song_order";
-const LAST_DAY_KEY = "weekndle_last_day";
-const RESULT_DAY_KEY = "weekndle_result_day";    // persisted outcome
+// ===========================
+// DAILY SONG (DETERMINISTIC)
+// ===========================
+// Use a single, global start date. Everyone maps the same calendar day → same song index.
+const WEEKNDLE_START_DATE = "2025-09-01"; // set your official launch date (UTC)
+const epochDays = () => Math.floor(Date.now() / 86400000);
+const startDay = Math.floor(new Date(WEEKNDLE_START_DATE).getTime() / 86400000);
+const today = epochDays();
+const dayOffset = today - startDay;
+const songIndex = ((dayOffset % songs.length) + songs.length) % songs.length;
+const target = songs[songIndex];
+
+// ===========================
+// PERSISTED RESULT / LOCKS
+// ===========================
+const RESULT_DAY_KEY  = "weekndle_result_day";   // numeric day id when finished
 const RESULT_TYPE_KEY = "weekndle_result_type";  // "win" | "loss"
-const GAMEOVER_KEY = "weekndle_game_over_day";   // disables guessing UI
-const STATS_KEY = "weekndle_stats";
+const GAMEOVER_KEY    = "weekndle_game_over_day";// disables guessing for today
 
-const today = Math.floor(Date.now() / 86400000);
-
-// Reset locks in test mode or when ?reset is present
+// In test/reset modes, clear locks so dev can replay
 (function replaySafety(){
   const p = new URLSearchParams(location.search);
-  if (p.has("test") || p.has("reset")) {
-    [RESULT_DAY_KEY, RESULT_TYPE_KEY, "weekndle_win_day", "weekndle_gameover"].forEach(k => localStorage.removeItem(k));
+  if (p.has("test") || p.has("reset")){
+    [RESULT_DAY_KEY, RESULT_TYPE_KEY, GAMEOVER_KEY, "weekndle_win_day"].forEach(k => localStorage.removeItem(k));
   }
 })();
 
-function markResultToday(type){ if (isTestMode()) return; localStorage.setItem(RESULT_DAY_KEY, String(today)); localStorage.setItem(RESULT_TYPE_KEY, type); }
-function getTodayResult(){ if (isTestMode()) return null; const d = parseInt(localStorage.getItem(RESULT_DAY_KEY), 10); return d === today ? localStorage.getItem(RESULT_TYPE_KEY) : null; }
+function markResultToday(type){
+  if (isTestMode()) return; // don’t persist in test mode
+  localStorage.setItem(RESULT_DAY_KEY, String(today));
+  localStorage.setItem(RESULT_TYPE_KEY, type);
+  localStorage.setItem(GAMEOVER_KEY, String(today));
+}
 
-let songOrder = JSON.parse(localStorage.getItem(SONG_ORDER_KEY));
-let lastDay = parseInt(localStorage.getItem(LAST_DAY_KEY), 10) || today;
-if (!songOrder || songOrder.length !== songs.length) { songOrder = shuffleArray(songs.map((_, i) => i)); localStorage.setItem(SONG_ORDER_KEY, JSON.stringify(songOrder)); localStorage.setItem(LAST_DAY_KEY, today); lastDay = today; }
-let dayOffset = today - lastDay;
-let songIndex = ((dayOffset % songs.length) + songs.length) % songs.length;
-if (dayOffset >= songs.length) { songOrder = shuffleArray(songs.map((_, i) => i)); localStorage.setItem(SONG_ORDER_KEY, JSON.stringify(songOrder)); localStorage.setItem(LAST_DAY_KEY, today); songIndex = 0; }
-const target = songs[songOrder[songIndex]];
+function getTodayResult(){
+  if (isTestMode()) return null;
+  const d = parseInt(localStorage.getItem(RESULT_DAY_KEY), 10);
+  return d === today ? localStorage.getItem(RESULT_TYPE_KEY) : null;
+}
 
-// ---------------------------
+function hasGameEndedToday(){
+  if (isTestMode()) return false;
+  return parseInt(localStorage.getItem(GAMEOVER_KEY), 10) === today;
+}
+
+// ===========================
 // PLAYER STATS
-// ---------------------------
-function getDefaultStats(){ return { plays:0, wins:0, winPct:0, currentStreak:0, maxStreak:0, guessDistribution:Array(8).fill(0), lastCompletedDay:null }; }
-function loadStats(){ try { const raw = localStorage.getItem(STATS_KEY); return raw ? JSON.parse(raw) : getDefaultStats(); } catch { return getDefaultStats(); } }
-function saveStats(s){ s.winPct = s.plays > 0 ? Math.round((s.wins / s.plays) * 100) : 0; localStorage.setItem(STATS_KEY, JSON.stringify(s)); }
-function markGameOverForToday(){ if (isTestMode()) return; localStorage.setItem(GAMEOVER_KEY, String(today)); }
-function hasGameEndedToday(){ return isTestMode() ? false : parseInt(localStorage.getItem(GAMEOVER_KEY), 10) === today; }
+// ===========================
+const STATS_KEY = "weekndle_stats";
+function defaultStats(){ return { plays:0, wins:0, winPct:0, currentStreak:0, maxStreak:0, guessDistribution:Array(8).fill(0), lastCompletedDay:null }; }
+function loadStats(){ try{ const raw = localStorage.getItem(STATS_KEY); return raw ? JSON.parse(raw) : defaultStats(); } catch{ return defaultStats(); } }
+function saveStats(s){ s.winPct = s.plays > 0 ? Math.round((s.wins/s.plays)*100) : 0; localStorage.setItem(STATS_KEY, JSON.stringify(s)); }
 
 function finalizeDay(result, guessesCount){
   if (hasGameEndedToday()) return;
-  const stats = loadStats();
-  if (stats.lastCompletedDay !== today) {
-    stats.plays += 1;
-    if (stats.lastCompletedDay === today - 1) { stats.currentStreak = (result === "win") ? stats.currentStreak + 1 : 0; }
-    else { stats.currentStreak = (result === "win") ? 1 : 0; }
-    if (result === "win") {
-      stats.wins += 1;
-      if (guessesCount && guessesCount >= 1 && guessesCount <= 8) stats.guessDistribution[guessesCount - 1] += 1;
-      if (stats.currentStreak > stats.maxStreak) stats.maxStreak = stats.currentStreak;
+  const s = loadStats();
+  if (s.lastCompletedDay !== today){
+    s.plays += 1;
+    if (s.lastCompletedDay === today - 1) s.currentStreak = (result === "win") ? s.currentStreak + 1 : 0;
+    else s.currentStreak = (result === "win") ? 1 : 0;
+
+    if (result === "win"){
+      s.wins += 1;
+      if (guessesCount && guessesCount >=1 && guessesCount <=8) s.guessDistribution[guessesCount-1] += 1;
+      if (s.currentStreak > s.maxStreak) s.maxStreak = s.currentStreak;
     }
-    stats.lastCompletedDay = today;
-    saveStats(stats);
-    markGameOverForToday();
-    if (!isTestMode()) disableGuessingUI();
+    s.lastCompletedDay = today;
+    saveStats(s);
   }
+  markResultToday(result);
+  if (!isTestMode()) disableGuessingUI();
 }
 
-// ---------------------------
+// ===========================
 // GAME STATE
-// ---------------------------
+// ===========================
 let guesses = [];
 
-// ---------------------------
+// ===========================
 // SUBMIT GUESS
-// ---------------------------
+// ===========================
 function submitGuess(){
-  if (hasGameEndedToday()) { alert("You’ve already completed today’s game. Come back tomorrow!"); return; }
+  if (hasGameEndedToday()){ alert("You’ve already completed today’s game. Come back tomorrow!"); return; }
+
   const input = $("guessInput");
   const guessTitle = (input.value || "").trim();
   input.value = "";
-  const guessSong = songs.find(song => song.title.toLowerCase() === guessTitle.toLowerCase());
-  if (!guessSong) { alert("Song not found in the database!"); return; }
+
+  const guessSong = songs.find(s => s.title.toLowerCase() === guessTitle.toLowerCase());
+  if (!guessSong){ alert("Song not found in the database!"); return; }
 
   const feedback = {
     track: guessSong.track === target.track ? "green" : (Math.abs(guessSong.track - target.track) <= 2 ? "yellow" : "gray"),
     trackArrow: guessSong.track < target.track ? "↑" : (guessSong.track > target.track ? "↓" : ""),
     duration: Math.abs(guessSong.duration - target.duration) <= 30 ? "yellow" : "gray",
     durationArrow: guessSong.duration < target.duration ? "↑" : (guessSong.duration > target.duration ? "↓" : ""),
-    albumArrow: albumOrderMap[guessSong.album] < albumOrderMap[target.album] ? "↑" : (albumOrderMap[guessSong.album] > albumOrderMap[target.album] ? "↓" : ""),
     album: guessSong.album === target.album ? "green" : (Math.abs(albumOrderMap[guessSong.album] - albumOrderMap[target.album]) <= 2 ? "yellow" : "gray"),
+    albumArrow: albumOrderMap[guessSong.album] < albumOrderMap[target.album] ? "↑" : (albumOrderMap[guessSong.album] > albumOrderMap[target.album] ? "↓" : ""),
     streams: guessSong.streams,
     streamsClass: guessSong.title === target.title ? "green" : "gray",
     streamsArrow: guessSong.streams < target.streams ? "↑" : (guessSong.streams > target.streams ? "↓" : ""),
@@ -258,32 +274,25 @@ function submitGuess(){
   guesses.push({ guessSong, feedback });
   renderGuesses();
 
-  if (guessSong.title === target.title) {
-    markResultToday("win");
+  if (guessSong.title === target.title){
     finalizeDay("win", guesses.length);
     swapToSeeResults("win");
     showWinOverlay();
-    const input = document.getElementById("guessInput");
-    if (input) {
-    input.disabled = true;
-    input.value = "";  // clear out whatever was typed
-    input.placeholder = `You guessed it in ${guesses.length}!`;
-  }
-
+    const gi = $("guessInput");
+    if (gi){ gi.disabled = true; gi.placeholder = `You guessed it in ${guesses.length}!`; }
     return;
   }
 
-  if (guesses.length >= 8) {
-    markResultToday("loss");
-    finalizeDay("loss");
+  if (guesses.length >= 8){
+    finalizeDay("loss", null);
     swapToSeeResults("loss");
     showLossOverlay();
   }
 }
 
-// ---------------------------
+// ===========================
 // RENDER GUESSES
-// ---------------------------
+// ===========================
 function renderGuesses(){
   const tbody = document.querySelector("#guessesTable tbody");
   if (!tbody) return;
@@ -326,49 +335,182 @@ function renderGuesses(){
   });
 }
 
-// ---------------------------
-// AUTOCOMPLETE (unchanged behavior)
-// ---------------------------
-function acNorm(s){ return (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/&/g, " and ").replace(/[^a-z0-9 ]+/g, " ").replace(/\s+/g, " ").trim(); }
+// ===========================
+// AUTOCOMPLETE
+// ===========================
+function acNorm(s){ return (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/&/g," and ").replace(/[^a-z0-9 ]+/g," ").replace(/\s+/g," ").trim(); }
 function acTokens(s){ return acNorm(s).split(" ").filter(Boolean); }
 function acCategory(title, qNorm){ const norm = acNorm(title); if (!qNorm) return 3; if (norm.startsWith(qNorm)) return 0; const tokens = acTokens(title); if (tokens.some(t => t.startsWith(qNorm))) return 1; if (norm.includes(qNorm)) return 2; return 3; }
-function acEscapeRe(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
-function acHighlight(title, rawQuery){ if (!rawQuery) return title; const re = new RegExp(acEscapeRe(rawQuery), "i"); const m = title.match(re); return m ? title.replace(re, "<strong>"+m[0]+"</strong>") : title; }
-function autocomplete(input, songs){ let currentFocus; input.addEventListener("input", function(){ const val = this.value || ""; closeAllLists(); if (!val) return false; currentFocus = -1; const listDiv = document.createElement("div"); listDiv.id = this.id + "autocomplete-list"; listDiv.className = "autocomplete-items"; this.parentNode.appendChild(listDiv); const qNorm = acNorm(val); const matches = songs.map(s => ({ title: s.title, cat: acCategory(s.title, qNorm) })).filter(x => x.cat !== 3); matches.sort((a,b)=> a.cat!==b.cat ? a.cat-b.cat : a.title.localeCompare(b.title, undefined, { sensitivity: "base" })); matches.slice(0,5).forEach(({title})=>{ const itemDiv = document.createElement("div"); itemDiv.innerHTML = acHighlight(title, val); itemDiv.addEventListener("click", function(){ input.value = title; closeAllLists(); }); listDiv.appendChild(itemDiv); }); }); input.addEventListener("keydown", function(e){ let list = document.getElementById(this.id + "autocomplete-list"); if (list) list = list.getElementsByTagName("div"); if (e.keyCode === 40){ currentFocus++; addActive(list);} else if (e.keyCode === 38){ currentFocus--; addActive(list);} else if (e.keyCode === 13){ e.preventDefault(); if (currentFocus > -1 && list) list[currentFocus].click(); } }); function addActive(list){ if (!list) return; removeActive(list); if (currentFocus >= list.length) currentFocus = 0; if (currentFocus < 0) currentFocus = list.length - 1; list[currentFocus].classList.add("autocomplete-active"); } function removeActive(list){ for (let i=0; i<list.length; i++) list[i].classList.remove("autocomplete-active"); } function closeAllLists(elmnt){ const items = document.getElementsByClassName("autocomplete-items"); for (let i=0; i<items.length; i++){ if (elmnt !== items[i] && elmnt !== input){ items[i].parentNode && items[i].parentNode.removeChild(items[i]); } } } document.addEventListener("click", function(e){ closeAllLists(e.target); }); }
+function acEscapeRe(s){ return s.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"); }
+function acHighlight(title, raw){ if (!raw) return title; const re = new RegExp(acEscapeRe(raw), "i"); const m = title.match(re); return m ? title.replace(re, "<strong>"+m[0]+"</strong>") : title; }
+function autocomplete(input, songs){
+  let currentFocus;
+  input.addEventListener("input", function(){
+    const val = this.value || "";
+    closeAllLists();
+    if (!val) return false;
+    currentFocus = -1;
+    const listDiv = document.createElement("div");
+    listDiv.id = this.id + "autocomplete-list";
+    listDiv.className = "autocomplete-items";
+    this.parentNode.appendChild(listDiv);
+    const qNorm = acNorm(val);
+    const matches = songs.map(s => ({ title: s.title, cat: acCategory(s.title, qNorm) }))
+                         .filter(x => x.cat !== 3)
+                         .sort((a,b)=> a.cat!==b.cat ? a.cat-b.cat : a.title.localeCompare(b.title, undefined, {sensitivity:"base"}));
+    matches.slice(0,5).forEach(({title})=>{
+      const itemDiv = document.createElement("div");
+      itemDiv.innerHTML = acHighlight(title, val);
+      itemDiv.addEventListener("click", function(){ input.value = title; closeAllLists(); });
+      listDiv.appendChild(itemDiv);
+    });
+  });
+  input.addEventListener("keydown", function(e){
+    let list = document.getElementById(this.id + "autocomplete-list");
+    if (list) list = list.getElementsByTagName("div");
+    if (e.keyCode === 40){ currentFocus++; addActive(list); }
+    else if (e.keyCode === 38){ currentFocus--; addActive(list); }
+    else if (e.keyCode === 13){ e.preventDefault(); if (currentFocus > -1 && list) list[currentFocus].click(); }
+  });
+  function addActive(list){ if (!list) return; removeActive(list); if (currentFocus >= list.length) currentFocus = 0; if (currentFocus < 0) currentFocus = list.length - 1; list[currentFocus].classList.add("autocomplete-active"); }
+  function removeActive(list){ for (let i=0;i<list.length;i++) list[i].classList.remove("autocomplete-active"); }
+  function closeAllLists(elmnt){ const items = document.getElementsByClassName("autocomplete-items"); for (let i=0;i<items.length;i++){ if (elmnt !== items[i] && elmnt !== input){ items[i].parentNode && items[i].parentNode.removeChild(items[i]); } } }
+  document.addEventListener("click", function(e){ closeAllLists(e.target); });
+}
 autocomplete($("guessInput"), songs);
 
-// ---------------------------
-// WIN / LOSS OVERLAYS + SHARE
-// ---------------------------
+// ===========================
+// SHARE / DAY NUMBER
+// ===========================
 const COLOR_SQUARE = { green:"🟩", yellow:"🟨", gray:"⬛" };
-const WEEKNDLE_START_DATE = "2025-09-01"; // TODO: set to actual launch date (UTC midnight)
-function getWeekndleNumber(){ const startDay = Math.floor(new Date(WEEKNDLE_START_DATE).getTime() / 86400000); return today - startDay + 1; }
+function getWeekndleNumber(){
+  const sd = Math.floor(new Date(WEEKNDLE_START_DATE).getTime() / 86400000);
+  return today - sd + 1;
+}
 function feedbackToSquare(cls){ return COLOR_SQUARE[cls] || "⬛"; }
-function buildShareText(){ const dayNo = getWeekndleNumber(); const attempts = guesses.length; const header = `Weekndle #${dayNo} ${attempts}/8`; const lines = guesses.map(g => { const isSongMatch = g.guessSong.title === target.title; const songSquare = isSongMatch ? "🟩" : "⬛"; const albumSquare = feedbackToSquare(g.feedback.album); const trackSquare = feedbackToSquare(g.feedback.track); const durationSquare = feedbackToSquare(g.feedback.duration); let streamsEmoji = ""; if (g.feedback.streamsArrow === "↑") streamsEmoji = "⬆️"; if (g.feedback.streamsArrow === "↓") streamsEmoji = "⬇️"; return `${songSquare}${albumSquare}${trackSquare}${durationSquare}${streamsEmoji}`.trimEnd(); }); const url = "https://your-weekndle-domain.example"; return [header, "", ...lines, "", url].join("\n"); }
-function shareScore(){ const text = buildShareText(); if (navigator.share){ navigator.share({ text }).catch(()=> navigator.clipboard ? navigator.clipboard.writeText(text).then(()=>alert("Score copied to clipboard!")) : prompt("Copy your score:", text)); } else if (navigator.clipboard){ navigator.clipboard.writeText(text).then(()=>alert("Score copied to clipboard!")); } else { prompt("Copy your score:", text); } }
-
-function renderGuessDistributionInto(elId){ const root = $(elId); if (!root) return; let dist = Array(8).fill(0); try { const raw = localStorage.getItem(STATS_KEY); if (raw){ const s = JSON.parse(raw); if (s && Array.isArray(s.guessDistribution)) dist = s.guessDistribution.slice(0,8); } } catch {} const justPlayed = Array.isArray(guesses) && guesses.length > 0; if (dist.every(n=>n===0) && justPlayed){ const idx = Math.min(Math.max(guesses.length,1),8) - 1; dist[idx] = 1; } const max = Math.max(1, ...dist); root.innerHTML = dist.map((count,i)=>`<div class="gd-row" style="display:flex;align-items:center;gap:8px;margin:4px 0;"><div class="gd-num" style="width:20px;text-align:right;opacity:.8;">${i+1}</div><div class="gd-bar" style="flex:1;height:14px;background:#333;border-radius:6px;overflow:hidden;"><div style="width:${Math.round((count/max)*100)}%;height:100%;background:#1db954;text-align:right;padding-right:6px;font-size:12px;line-height:14px;">${count}</div></div></div>`).join(""); }
-
-function renderStatsIntoOverlay(){ const s = loadStats(); const byId = (id)=>$(id); if (byId("statPlays")) byId("statPlays").innerText = s.plays; if (byId("statWinPct")) byId("statWinPct").innerText = s.winPct; if (byId("statCurrentStreak")) byId("statCurrentStreak").innerText = s.currentStreak; if (byId("statMaxStreak")) byId("statMaxStreak").innerText = s.maxStreak; const distRoot = byId("guessDist"); if (distRoot){ const max = Math.max(1, ...s.guessDistribution); distRoot.innerHTML = s.guessDistribution.map((count,i)=>{ const pct = Math.round((count / max) * 100); return `<div style="display:flex; align-items:center; gap:8px; margin:4px 0;"><div style="width:20px; text-align:right;">${i+1}</div><div style="flex:1; height:10px; background:#333;"><div style="width:${pct}%; height:10px; background:#1db954;"></div></div><div style="width:40px; text-align:left;">${count}</div></div>`; }).join(""); }
+function buildShareText(){
+  const dayNo = getWeekndleNumber();
+  const attempts = guesses.length;
+  const header = `Weekndle #${dayNo} ${attempts}/8`;
+  const lines = guesses.map(g => {
+    const songSquare = g.guessSong.title === target.title ? "🟩" : "⬛";
+    const albumSquare = feedbackToSquare(g.feedback.album);
+    const trackSquare = feedbackToSquare(g.feedback.track);
+    const durationSquare = feedbackToSquare(g.feedback.duration);
+    let streamsEmoji = "";
+    if (g.feedback.streamsArrow === "↑") streamsEmoji = "⬆️";
+    if (g.feedback.streamsArrow === "↓") streamsEmoji = "⬇️";
+    return `${songSquare}${albumSquare}${trackSquare}${durationSquare}${streamsEmoji}`.trimEnd();
+  });
+  const url = location.origin; // replace with your canonical domain if needed
+  return [header, "", ...lines, "", url].join("\n");
+}
+function shareScore(){
+  const text = buildShareText();
+  if (navigator.share){
+    navigator.share({ text }).catch(()=> navigator.clipboard ? navigator.clipboard.writeText(text).then(()=>alert("Score copied to clipboard!")) : prompt("Copy your score:", text));
+  } else if (navigator.clipboard){
+    navigator.clipboard.writeText(text).then(()=>alert("Score copied to clipboard!"));
+  } else {
+    prompt("Copy your score:", text);
+  }
 }
 
-function showWinOverlay(){ const cover = $("albumCover"); const title = $("winSongTitle"); if (cover) cover.src = target.cover; if (title) title.innerText = target.title; renderStatsIntoOverlay(); $("winOverlay").style.display = "flex"; document.body.classList.add("modal-open"); }
-function closeWinOverlay(){ const overlay = $("winOverlay"); if (overlay) overlay.style.display = "none"; document.body.classList.remove("modal-open"); }
+// ===========================
+// OVERLAYS
+// ===========================
+function renderGuessDistributionInto(elId){
+  const root = $(elId);
+  if (!root) return;
+  let dist = Array(8).fill(0);
+  try{
+    const raw = localStorage.getItem(STATS_KEY);
+    if (raw){
+      const s = JSON.parse(raw);
+      if (s && Array.isArray(s.guessDistribution)) dist = s.guessDistribution.slice(0,8);
+    }
+  } catch {}
+  const justPlayed = Array.isArray(guesses) && guesses.length > 0;
+  if (dist.every(n=>n===0) && justPlayed){
+    const idx = Math.min(Math.max(guesses.length,1),8) - 1;
+    dist[idx] = 1;
+  }
+  const max = Math.max(1, ...dist);
+  root.innerHTML = dist.map((count,i)=>`<div class="gd-row" style="display:flex;align-items:center;gap:8px;margin:4px 0;"><div class="gd-num" style="width:20px;text-align:right;opacity:.8;">${i+1}</div><div class="gd-bar" style="flex:1;height:14px;background:#333;border-radius:6px;overflow:hidden;"><div style="width:${Math.round((count/max)*100)}%;height:100%;background:#1db954;text-align:right;padding-right:6px;font-size:12px;line-height:14px;">${count}</div></div></div>`).join("");
+}
 
-function showLossOverlay(){ const cover = $("lossAlbumCover"); const title = $("lossSongTitle"); if (cover) cover.src = target.cover; if (title) title.innerText = target.title; renderGuessDistributionInto("guessDistLoss"); $("lossOverlay").style.display = "flex"; document.body.classList.add("modal-open"); }
-function closeLossOverlay(){ const overlay = $("lossOverlay"); if (overlay) overlay.style.display = "none"; document.body.classList.remove("modal-open"); }
+function renderStatsIntoOverlay(){
+  const s = loadStats();
+  const byId = id => $(id);
+  if (byId("statPlays")) byId("statPlays").innerText = s.plays;
+  if (byId("statWinPct")) byId("statWinPct").innerText = s.winPct;
+  if (byId("statCurrentStreak")) byId("statCurrentStreak").innerText = s.currentStreak;
+  if (byId("statMaxStreak")) byId("statMaxStreak").innerText = s.maxStreak;
 
-// Bind static buttons once
-(function bindStaticButtons(){ const closeLoss = $("closeLossBtn"); if (closeLoss) closeLoss.addEventListener("click", closeLossOverlay); const shareWin = $("shareScoreBtn"); if (shareWin) shareWin.addEventListener("click", shareScore); const shareLoss = $("shareLossBtn"); if (shareLoss) shareLoss.addEventListener("click", shareScore); })();
+  const distRoot = byId("guessDist");
+  if (distRoot){
+    const max = Math.max(1, ...s.guessDistribution);
+    distRoot.innerHTML = s.guessDistribution.map((count,i)=>{
+      const pct = Math.round((count/max)*100);
+      return `<div style="display:flex; align-items:center; gap:8px; margin:4px 0;">
+        <div style="width:20px; text-align:right;">${i+1}</div>
+        <div style="flex:1; height:10px; background:#333;"><div style="width:${pct}%; height:10px; background:#1db954;"></div></div>
+        <div style="width:40px; text-align:left;">${count}</div>
+      </div>`;
+    }).join("");
+  }
+}
 
-// ---------------------------
-// SEE RESULTS BUTTON (single, de-duplicated)
-// ---------------------------
-function swapToSeeResults(outcome){
+function showWinOverlay(){
+  const cover = $("albumCover");
+  const title = $("winSongTitle");
+  if (cover) cover.src = target.cover;
+  if (title) title.innerText = target.title;
+  renderStatsIntoOverlay();
+  $("winOverlay").style.display = "flex";
+  document.body.classList.add("modal-open");
+}
+function closeWinOverlay(){
+  const ov = $("winOverlay");
+  if (ov) ov.style.display = "none";
+  document.body.classList.remove("modal-open");
+}
+
+function showLossOverlay(){
+  const cover = $("lossAlbumCover");
+  const title = $("lossSongTitle");
+  if (cover) cover.src = target.cover;
+  if (title) title.innerText = target.title;
+  renderGuessDistributionInto("guessDistLoss");
+  $("lossOverlay").style.display = "flex";
+  document.body.classList.add("modal-open");
+}
+function closeLossOverlay(){
+  const ov = $("lossOverlay");
+  if (ov) ov.style.display = "none";
+  document.body.classList.remove("modal-open");
+}
+
+// Bind static overlay buttons
+(function bindStaticButtons(){
+  const shareWin = $("shareScoreBtn");
+  if (shareWin) shareWin.addEventListener("click", shareScore);
+  const shareLoss = $("shareLossBtn");
+  if (shareLoss) shareLoss.addEventListener("click", shareScore);
+  const closeLoss = $("closeLossBtn");
+  if (closeLoss) closeLoss.addEventListener("click", closeLossOverlay);
+})();
+
+// ===========================
+// SEE RESULTS (single source of truth)
+// ===========================
+function swapToSeeResults(outcome /* "win" | "loss" */){
   const guessBtn = $("guessBtn");
   const seeBtn   = $("seeResultsBtn");
   if (!seeBtn) return;
-  if (outcome) seeBtn.dataset.result = outcome; // remember last outcome for this session
+
+  if (outcome) seeBtn.dataset.result = outcome;
+
   if (!seeBtn.dataset.bound){
     seeBtn.addEventListener("click", () => {
       const btnOutcome = seeBtn.dataset.result;
@@ -380,82 +522,95 @@ function swapToSeeResults(outcome){
     });
     seeBtn.dataset.bound = "1";
   }
-  if (isTestMode()) { seeBtn.style.display = "inline-block"; if (guessBtn) guessBtn.style.display = "inline-block"; return; }
-  seeBtn.style.display = "inline-block"; if (guessBtn) guessBtn.style.display = "none";
+
+  if (isTestMode()){
+    seeBtn.style.display = "inline-block";
+    if (guessBtn) guessBtn.style.display = "inline-block";
+    return;
+  }
+  seeBtn.style.display = "inline-block";
+  if (guessBtn) guessBtn.style.display = "none";
 }
 
-// On load, if already finished, show See Results
-(function initSeeResultsBtn(){ if (isTestMode()) return; const guessBtn = $("guessBtn"); const seeBtn = $("seeResultsBtn"); if (!guessBtn || !seeBtn) return; const res = getTodayResult(); if (res){ guessBtn.style.display = "none"; seeBtn.style.display = "inline-block"; if (!seeBtn.dataset.bound){ seeBtn.addEventListener("click", () => { const r = getTodayResult(); if (r === "loss") showLossOverlay(); else showWinOverlay(); }); seeBtn.dataset.bound = "1"; } } })();
+// If finished earlier today, default to “See results”
+(function initSeeResultsBtn(){
+  if (isTestMode()) return;
+  const guessBtn = $("guessBtn");
+  const seeBtn   = $("seeResultsBtn");
+  if (!guessBtn || !seeBtn) return;
+  const res = getTodayResult();
+  if (res){
+    guessBtn.style.display = "none";
+    seeBtn.style.display   = "inline-block";
+    if (!seeBtn.dataset.bound){
+      seeBtn.addEventListener("click", () => {
+        const r = getTodayResult();
+        if (r === "loss") showLossOverlay(); else showWinOverlay();
+      });
+      seeBtn.dataset.bound = "1";
+    }
+  }
+})();
 
-// ---------------------------
+// ===========================
 // HOW TO PLAY + COUNTDOWN
-// ---------------------------
-$("howToPlayBtn").addEventListener("click", () => { $("howToPlayOverlay").style.display = "flex"; });
-$("closeHowTo").addEventListener("click", () => { $("howToPlayOverlay").style.display = "none"; });
+// ===========================
+$("howToPlayBtn").addEventListener("click", () => { $("howToPlayOverlay").style.display = "flex"; document.body.classList.add("modal-open"); });
+$("closeHowTo").addEventListener("click", () => { $("howToPlayOverlay").style.display = "none"; document.body.classList.remove("modal-open"); });
 
-function updateCountdown(){ const countdownEl = $("countdown"); if (!countdownEl) return; const now = new Date(); const nextMidnight = new Date(); nextMidnight.setHours(24,0,0,0); const diff = nextMidnight - now; const hours = Math.floor(diff / (1000*60*60)); const minutes = Math.floor((diff % (1000*60*60))/(1000*60)); countdownEl.innerText = `Next song unlocks in ${hours}h ${minutes}m`; }
+function updateCountdown(){
+  const el = $("countdown");
+  if (!el) return;
+  const now = new Date();
+  const nextMidnight = new Date();
+  nextMidnight.setHours(24,0,0,0);
+  const diff = nextMidnight - now;
+  const hours = Math.floor(diff / (1000*60*60));
+  const minutes = Math.floor((diff % (1000*60*60))/(1000*60));
+  el.innerText = `Next song unlocks in ${hours}h ${minutes}m`;
+}
 setInterval(updateCountdown, 1000); updateCountdown();
 
-// ---------------------------
-// GUESSING UI ENABLE/DISABLE
-// ---------------------------
-function disableGuessingUI(){ if (isTestMode()) return; const input = $("guessInput"); if (input){ input.disabled = true; input.placeholder = "Come back tomorrow!"; } const guessBtn = document.querySelector('button[onclick="submitGuess()"]'); if (guessBtn) guessBtn.disabled = true; }
-function enableGuessingUI(){ const input = $("guessInput"); if (input){ input.disabled = false; input.placeholder = "Enter song title"; } const guessBtn = document.querySelector('button[onclick="submitGuess()"]'); if (guessBtn) guessBtn.disabled = false; }
-
+// ===========================
+// GUESSING UI (enable/disable)
+// ===========================
+function disableGuessingUI(){
+  if (isTestMode()) return;
+  const input = $("guessInput");
+  if (input){ input.disabled = true; input.placeholder = "Come back tomorrow!"; }
+  const guessBtn = document.querySelector('button[onclick="submitGuess()"]');
+  if (guessBtn) guessBtn.disabled = true;
+}
+function enableGuessingUI(){
+  const input = $("guessInput");
+  if (input){ input.disabled = false; input.placeholder = "Enter song title"; }
+  const guessBtn = document.querySelector('button[onclick="submitGuess()"]');
+  if (guessBtn) guessBtn.disabled = false;
+}
 if (hasGameEndedToday()) disableGuessingUI(); else enableGuessingUI();
 
-// --- Guess distribution preview in Win popup ---
-function renderGuessDistribution(){ const root = $("guessDist"); if (!root) return; let dist = Array(8).fill(0); try { const raw = localStorage.getItem(STATS_KEY); if (raw){ const s = JSON.parse(raw); if (s && Array.isArray(s.guessDistribution)) dist = s.guessDistribution.slice(0,8); } } catch {} const justWon = guesses.length > 0 && guesses.at(-1)?.guessSong?.title === target.title; if (dist.every(n=>n===0) && justWon){ const idx = Math.min(Math.max(guesses.length,1),8) - 1; dist[idx] = 1; } const max = Math.max(1, ...dist); root.innerHTML = dist.map((count,i)=>{ const pct = Math.round((count/max)*100); return `<div class="gd-row"><div class="gd-num">${i+1}</div><div class="gd-bar"><div style="width:${pct}%">${count}</div></div></div>`; }).join(""); }
-// --- About / Privacy modals (works even if overlays are after the script) ---
-(function () {
+// ===========================
+// ABOUT / PRIVACY MODALS (index.html variants)
+// ===========================
+(function wireAboutPrivacy(){
   const aboutLink = document.getElementById("aboutLink");
   const privacyLink = document.getElementById("privacyLink");
 
-  function openOverlayById(id) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.style.display = "flex";
-    document.body.classList.add("modal-open"); // scroll lock (CSS already present)
-  }
+  function openOverlayById(id){ const el = document.getElementById(id); if (!el) return; el.style.display = "flex"; document.body.classList.add("modal-open"); }
+  function closeOverlayById(id){ const el = document.getElementById(id); if (!el) return; el.style.display = "none"; document.body.classList.remove("modal-open"); }
 
-  function closeOverlayById(id) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.style.display = "none";
-    document.body.classList.remove("modal-open");
-  }
+  if (aboutLink)  aboutLink.addEventListener("click",  (e)=>{ e.preventDefault(); openOverlayById("aboutOverlay"); });
+  if (privacyLink)privacyLink.addEventListener("click", (e)=>{ e.preventDefault(); openOverlayById("privacyOverlay"); });
 
-  // Open on link click (lazy-lookup ensures elements can be below the script tag)
-  if (aboutLink) {
-    aboutLink.addEventListener("click", (e) => {
-      e.preventDefault();
-      openOverlayById("aboutOverlay");
-    });
-  }
-  if (privacyLink) {
-    privacyLink.addEventListener("click", (e) => {
-      e.preventDefault();
-      openOverlayById("privacyOverlay");
-    });
-  }
-
-  // Close via buttons or backdrop (event delegation)
   document.addEventListener("click", (e) => {
-    if (e.target && e.target.id === "aboutCloseBtn")  closeOverlayById("aboutOverlay");
+    if (e.target && e.target.id === "aboutCloseBtn")   closeOverlayById("aboutOverlay");
     if (e.target && e.target.id === "privacyCloseBtn") closeOverlayById("privacyOverlay");
-
     const aboutOv   = document.getElementById("aboutOverlay");
     const privacyOv = document.getElementById("privacyOverlay");
     if (e.target === aboutOv)   closeOverlayById("aboutOverlay");
     if (e.target === privacyOv) closeOverlayById("privacyOverlay");
   });
-
-  // ESC to close either
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") {
-      closeOverlayById("aboutOverlay");
-      closeOverlayById("privacyOverlay");
-    }
+    if (e.key === "Escape"){ closeOverlayById("aboutOverlay"); closeOverlayById("privacyOverlay"); }
   });
 })();
-
