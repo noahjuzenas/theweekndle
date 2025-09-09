@@ -125,7 +125,7 @@ const songs = [
   { title: "Wake Me Up", album: "Hurry Up Tomorrow", track: 1, duration: 308, streams: 68000000, cover: "AlbumArts/HUT.jpg" },
   { title: "Cry For Me", album: "Hurry Up Tomorrow", track: 2, duration: 224, streams: 260000000, cover: "AlbumArts/HUT.jpg" },
   { title: "I Can't Fucking Sing", album: "Hurry Up Tomorrow", track: 3, duration: 12, streams: 45000, cover: "AlbumArts/HUT.jpg" },
-  { title: "Sao Paolo", album: "Hurry Up Tomorrow", track: 4, duration: 301, streams: 440000000, cover: "AlbumArts/HUT.jpg" },
+  { title: "Sao Paulo", album: "Hurry Up Tomorrow", track: 4, duration: 301, streams: 440000000, cover: "AlbumArts/HUT.jpg" },
   { title: "Until Were Skin & Bone", album: "Hurry Up Tomorrow", track: 5, duration: 22, streams: 93000, cover: "AlbumArts/HUT.jpg" },
   { title: "Baptized In Fear", album: "Hurry Up Tomorrow", track: 6, duration: 232, streams: 25000000, cover: "AlbumArts/HUT.jpg" },
   { title: "Open Hearts", album: "Hurry Up Tomorrow", track: 7, duration: 234, streams: 94000000, cover: "AlbumArts/HUT.jpg" },
