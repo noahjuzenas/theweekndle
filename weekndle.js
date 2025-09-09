@@ -1,5 +1,3 @@
-// weekndle.js — rewritten for deterministic daily song (same for everyone)
-
 // ===========================
 // SONG DATABASE
 // ===========================
