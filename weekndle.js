@@ -1,3 +1,5 @@
+// weekndle.js — local-midnight deterministic random daily song + full game logic
+
 // ===========================
 // SONG DATABASE
 // ===========================
@@ -658,7 +660,67 @@ function enableGuessingUI(){
 }
 if (hasGameEndedToday()) disableGuessingUI(); else enableGuessingUI();
 
-// Optional: Close overlays with ESC
+// ===========================
+// ABOUT & PRIVACY MODALS
+// ===========================
+(function wireAboutPrivacyModals(){
+  function openOverlay(id){
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.display = "flex";
+    document.body.classList.add("modal-open");
+  }
+  function closeOverlay(id){
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.display = "none";
+    document.body.classList.remove("modal-open");
+  }
+
+  // Openers (footer links)
+  const aboutLink = document.getElementById("aboutLink");
+  if (aboutLink){
+    aboutLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      openOverlay("aboutOverlay");
+    });
+  }
+  const privacyLink = document.getElementById("privacyLink");
+  if (privacyLink){
+    privacyLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      openOverlay("privacyOverlay");
+    });
+  }
+
+  // Document-level closers (works even if elements are added later)
+  document.addEventListener("click", (e) => {
+    // Close buttons
+    if (e.target && e.target.id === "aboutCloseBtn"){ closeOverlay("aboutOverlay"); }
+    if (e.target && e.target.id === "privacyCloseBtn"){ closeOverlay("privacyOverlay"); }
+
+    // Backdrop click (clicking on the overlay itself)
+    if (e.target && e.target.id === "aboutOverlay"){ closeOverlay("aboutOverlay"); }
+    if (e.target && e.target.id === "privacyOverlay"){ closeOverlay("privacyOverlay"); }
+  });
+
+  // Expose for ESC handler reuse
+  window.__wknd_closeOverlay = closeOverlay;
+})();
+
+
+// Close any open overlays with ESC
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") { closeWinOverlay(); closeLossOverlay(); }
+  if (e.key === "Escape") {
+    // Game overlays
+    if (typeof closeWinOverlay === "function") closeWinOverlay();
+    if (typeof closeLossOverlay === "function") closeLossOverlay();
+    // About/Privacy (if present)
+    if (window.__wknd_closeOverlay){
+      __wknd_closeOverlay("aboutOverlay");
+      __wknd_closeOverlay("privacyOverlay");
+    }
+  }
 });
+
+
