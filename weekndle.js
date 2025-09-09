@@ -13,6 +13,7 @@ const songs = [
   { title: "Loft Music", album: "House Of Balloons", track: 8, duration: 363, streams: 140000000, cover: "AlbumArts/HouseOfBalloons.jpg" },
   { title: "The Knowing", album: "House Of Balloons", track: 9, duration: 342, streams: 77000000, cover: "AlbumArts/HouseOfBalloons.jpg" },
   { title: "Twenty Eight", album: "House Of Balloons", track: 10, duration: 258, streams: 150000000, cover: "AlbumArts/HouseOfBalloons.jpg" },
+
   //Thursday//
   { title: "Lonely Star", album: "Thursday", track: 1, duration: 349, streams: 68000000, cover: "AlbumArts/Thursday.jpg" },
   { title: "Life of the Party", album: "Thursday", track: 2, duration: 296, streams: 62000000, cover: "AlbumArts/Thursday.jpg" },
@@ -24,6 +25,7 @@ const songs = [
   { title: "Rolling Stone", album: "Thursday", track: 8, duration: 230, streams: 73000000, cover: "AlbumArts/Thursday.jpg" },
   { title: "Heaven Or Las Vegas", album: "Thursday", track: 9, duration: 356, streams: 36000000, cover: "AlbumArts/Thursday.jpg" },
   { title: "Valerie", album: "Thursday", track: 10, duration: 286, streams: 100000000, cover: "AlbumArts/Thursday.jpg" },
+
   //Echoes Of Silence//
   { title: "D.D.", album: "Echoes Of Silence", track: 1, duration: 244, streams: 120000000, cover: "AlbumArts/EchoesOfSilence.jpg" },
   { title: "Montreal", album: "Echoes Of Silence", track: 2, duration: 250, streams: 80000000, cover: "AlbumArts/EchoesOfSilence.jpg" },
@@ -35,6 +37,7 @@ const songs = [
   { title: "Next", album: "Echoes Of Silence", track: 8, duration: 361, streams: 64000000, cover: "AlbumArts/EchoesOfSilence.jpg" },
   { title: "Echoes Of Silence", album: "Echoes Of Silence", track: 9, duration: 239, streams: 50000000, cover: "AlbumArts/EchoesOfSilence.jpg" },
   { title: "Till Dawn (Here Comes the Sun)", album: "Echoes Of Silence", track: 10, duration: 319, streams: 52000000, cover: "AlbumArts/EchoesOfSilence.jpg" },
+
   //Kiss Land//
   { title: "Professional", album: "Kiss Land", track: 1, duration: 368, streams: 90000000, cover: "AlbumArts/KissLand.jpg" },
   { title: "The Town", album: "Kiss Land", track: 2, duration: 307, streams: 62000000, cover: "AlbumArts/KissLand.jpg" },
@@ -46,6 +49,7 @@ const songs = [
   { title: "Kiss Land", album: "Kiss Land", track: 8, duration: 455, streams: 120000000, cover: "AlbumArts/KissLand.jpg" },
   { title: "Pretty", album: "Kiss Land", track: 9, duration: 375, streams: 85000000, cover: "AlbumArts/KissLand.jpg" },
   { title: "Tears In The Rain", album: "Kiss Land", track: 10, duration: 444, streams: 70000000, cover: "AlbumArts/KissLand.jpg" },
+
   //Beauty Behind the Madness//
   { title: "Real Life", album: "Beauty Behind the Madness", track: 1, duration: 223, streams: 140000000, cover: "AlbumArts/BBTM.jpg" },
   { title: "Losers", album: "Beauty Behind the Madness", track: 2, duration: 281, streams: 140000000, cover: "AlbumArts/BBTM.jpg" },
@@ -61,6 +65,7 @@ const songs = [
   { title: "Dark Times", album: "Beauty Behind the Madness", track: 12, duration: 260, streams: 280000000, cover: "AlbumArts/BBTM.jpg" },
   { title: "Prisoner", album: "Beauty Behind the Madness", track: 13, duration: 274, streams: 220000000, cover: "AlbumArts/BBTM.jpg" },
   { title: "Angel", album: "Beauty Behind the Madness", track: 14, duration: 377, streams: 150000000, cover: "AlbumArts/BBTM.jpg" },
+
   //Starboy//
   { title: "Starboy", album: "Starboy", track: 1, duration: 230, streams: 4100000000, cover: "AlbumArts/Starboy.jpg" },
   { title: "Party Monster", album: "Starboy", track: 2, duration: 249, streams: 950000000, cover: "AlbumArts/Starboy.jpg" },
@@ -80,6 +85,7 @@ const songs = [
   { title: "All I Know", album: "Starboy", track: 16, duration: 321, streams: 180000000, cover: "AlbumArts/Starboy.jpg" },
   { title: "Die for You", album: "Starboy", track: 17, duration: 260, streams: 2900000000, cover: "AlbumArts/Starboy.jpg" },
   { title: "I Feel It Coming", album: "Starboy", track: 18, duration: 269, streams: 2000000000, cover: "AlbumArts/Starboy.jpg" },
+
   //My Dear Melancholy,//
   { title: "Call Out My Name", album: "My Dear Melancholy,", track: 1, duration: 228, streams: 2200000000, cover: "AlbumArts/MDM.jpg" },
   { title: "Try Me", album: "My Dear Melancholy,", track: 2, duration: 221, streams: 410000000, cover: "AlbumArts/MDM.jpg" },
@@ -88,6 +94,7 @@ const songs = [
   { title: "Hurt You", album: "My Dear Melancholy,", track: 5, duration: 170, streams: 370000000, cover: "AlbumArts/MDM.jpg" },
   { title: "Privilege", album: "My Dear Melancholy,", track: 6, duration: 224, streams: 210000000, cover: "AlbumArts/MDM.jpg" },
   { title: "Call Out My Name - A Cappella", album: "My Dear Melancholy,", track: 7, duration: 224, streams: 39000000, cover: "AlbumArts/MDM.jpg" },
+
   //After Hours//
   { title: "Alone Again", album: "After Hours", track: 1, duration: 250, streams: 210000000, cover: "AlbumArts/AfterHours.jpg" },
   { title: "Too Late", album: "After Hours", track: 2, duration: 239, streams: 210000000, cover: "AlbumArts/AfterHours.jpg" },
@@ -103,6 +110,7 @@ const songs = [
   { title: "Repeat After Me (Interlude)", album: "After Hours", track: 12, duration: 195, streams: 130000000, cover: "AlbumArts/AfterHours.jpg" },
   { title: "After Hours", album: "After Hours", track: 13, duration: 361, streams: 1200000000, cover: "AlbumArts/AfterHours.jpg" },
   { title: "Until I Bleed Out", album: "After Hours", track: 14, duration: 190, streams: 120000000, cover: "AlbumArts/AfterHours.jpg" },
+
   //Dawn FM//
   { title: "Dawn FM", album: "Dawn FM", track: 1, duration: 96, streams: 70000000, cover: "AlbumArts/DawmFM.jpg" },
   { title: "Gasoline", album: "Dawn FM", track: 2, duration: 212, streams: 180000000, cover: "AlbumArts/DawmFM.jpg" },
@@ -120,6 +128,7 @@ const songs = [
   { title: "I Heard You're Married", album: "Dawn FM", track: 14, duration: 263, streams: 120000000, cover: "AlbumArts/DawmFM.jpg" },
   { title: "Less Than Zero", album: "Dawn FM", track: 15, duration: 211, streams: 370000000, cover: "AlbumArts/DawmFM.jpg" },
   { title: "Phantom Regret by Jim", album: "Dawn FM", track: 16, duration: 179, streams: 42000000, cover: "AlbumArts/DawmFM.jpg" },
+
   //Hurry Up Tomorrow//
   { title: "Wake Me Up", album: "Hurry Up Tomorrow", track: 1, duration: 308, streams: 68000000, cover: "AlbumArts/HUT.jpg" },
   { title: "Cry For Me", album: "Hurry Up Tomorrow", track: 2, duration: 224, streams: 260000000, cover: "AlbumArts/HUT.jpg" },
@@ -156,7 +165,7 @@ const albumOrderMap = {
   "My Dear Melancholy,": 7,
   "After Hours": 8,
   "Dawn FM": 9,
-  "Hurry Up Tomorrow": 10,
+  "Hurry Up Tomorrow": 10
 };
 
 // ===========================
@@ -167,16 +176,77 @@ function formatDuration(seconds){ const m = Math.floor(seconds/60); const s = se
 function isTestMode(){ return new URLSearchParams(location.search).has("test"); }
 
 // ===========================
-// DAILY SONG (DETERMINISTIC)
+// DAILY SONG (LOCAL MIDNIGHT + DETERMINISTIC RANDOM ORDER)
 // ===========================
-// Use a single, global start date. Everyone maps the same calendar day → same song index.
-const WEEKNDLE_START_DATE = "2025-09-01"; // set your official launch date (UTC)
-const epochDays = () => Math.floor(Date.now() / 86400000);
-const startDay = Math.floor(new Date(WEEKNDLE_START_DATE).getTime() / 86400000);
-const today = epochDays();
+
+// One canonical start date for the schedule (interpreted as the user's local date)
+const WEEKNDLE_START_DATE = "2025-09-01";
+
+// Change this seed to reshuffle the entire global schedule for everyone.
+// Keep it constant once you launch so the schedule stays stable.
+const WEEKNDLE_SEED = "weekndle_v1";
+
+const MS_PER_DAY = 86400000;
+
+// --- Local date → stable ordinal (increments exactly at local midnight; DST safe)
+function localOrdinalFromYMD(y, m0, d) {
+  // Use UTC epoch of the local Y/M/D to avoid timezone/DST drift in the ordinal math
+  return Math.floor(Date.UTC(y, m0, d) / MS_PER_DAY);
+}
+function localOrdinalToday() {
+  const now = new Date();
+  return localOrdinalFromYMD(now.getFullYear(), now.getMonth(), now.getDate());
+}
+function localOrdinalFromDateString(yyyyMmDd) {
+  const [y, m, d] = yyyyMmDd.split("-").map(Number);
+  return localOrdinalFromYMD(y, m - 1, d);
+}
+
+// --- Tiny deterministic PRNG (seeded)
+function xmur3(str){
+  let h = 1779033703 ^ str.length;
+  for (let i = 0; i < str.length; i++) {
+    h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
+    h = (h << 13) | (h >>> 19);
+  }
+  return function(){
+    h = Math.imul(h ^ (h >>> 16), 2246822507);
+    h = Math.imul(h ^ (h >>> 13), 3266489909);
+    return (h ^= h >>> 16) >>> 0;
+  };
+}
+function mulberry32(a){
+  return function(){
+    let t = (a += 0x6D2B79F5);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+// --- Deterministic Fisher–Yates using the seeded PRNG
+function seededPermutation(n, rng) {
+  const arr = Array.from({ length: n }, (_, i) => i);
+  for (let i = n - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// Build global permutation once per load (same on every device)
+const seedInt = xmur3(WEEKNDLE_SEED)();
+const rng = mulberry32(seedInt);
+const PERM = seededPermutation(songs.length, rng);
+
+// Map today's local day → a position in the permutation
+const today = localOrdinalToday(); // local-midnight day id
+const startDay = localOrdinalFromDateString(WEEKNDLE_START_DATE);
 const dayOffset = today - startDay;
-const songIndex = ((dayOffset % songs.length) + songs.length) % songs.length;
-const target = songs[songIndex];
+
+// Same song for everyone on the same local date; advances at local midnight
+const cycleIndex = ((dayOffset % songs.length) + songs.length) % songs.length;
+const target = songs[PERM[cycleIndex]];
 
 // ===========================
 // PERSISTED RESULT / LOCKS
@@ -382,8 +452,8 @@ autocomplete($("guessInput"), songs);
 // ===========================
 const COLOR_SQUARE = { green:"🟩", yellow:"🟨", gray:"⬛" };
 function getWeekndleNumber(){
-  const sd = Math.floor(new Date(WEEKNDLE_START_DATE).getTime() / 86400000);
-  return today - sd + 1;
+  const sd = localOrdinalFromDateString(WEEKNDLE_START_DATE);
+  return localOrdinalToday() - sd + 1;
 }
 function feedbackToSquare(cls){ return COLOR_SQUARE[cls] || "⬛"; }
 function buildShareText(){
@@ -400,7 +470,7 @@ function buildShareText(){
     if (g.feedback.streamsArrow === "↓") streamsEmoji = "⬇️";
     return `${songSquare}${albumSquare}${trackSquare}${durationSquare}${streamsEmoji}`.trimEnd();
   });
-  const url = location.origin; // replace with your canonical domain if needed
+  const url = location.origin;
   return [header, "", ...lines, "", url].join("\n");
 }
 function shareScore(){
@@ -415,7 +485,7 @@ function shareScore(){
 }
 
 // ===========================
-// OVERLAYS
+// OVERLAYS & STATS RENDER
 // ===========================
 function renderGuessDistributionInto(elId){
   const root = $(elId);
@@ -489,7 +559,7 @@ function closeLossOverlay(){
   document.body.classList.remove("modal-open");
 }
 
-// Bind static overlay buttons
+// Bind static overlay buttons (if present)
 (function bindStaticButtons(){
   const shareWin = $("shareScoreBtn");
   if (shareWin) shareWin.addEventListener("click", shareScore);
@@ -551,20 +621,21 @@ function swapToSeeResults(outcome /* "win" | "loss" */){
 })();
 
 // ===========================
-// HOW TO PLAY + COUNTDOWN
+// HOW TO PLAY + COUNTDOWN (LOCAL MIDNIGHT)
 // ===========================
-$("howToPlayBtn").addEventListener("click", () => { $("howToPlayOverlay").style.display = "flex"; document.body.classList.add("modal-open"); });
-$("closeHowTo").addEventListener("click", () => { $("howToPlayOverlay").style.display = "none"; document.body.classList.remove("modal-open"); });
+const htpBtn = $("howToPlayBtn");
+if (htpBtn) htpBtn.addEventListener("click", () => { $("howToPlayOverlay").style.display = "flex"; document.body.classList.add("modal-open"); });
+const htpClose = $("closeHowTo");
+if (htpClose) htpClose.addEventListener("click", () => { $("howToPlayOverlay").style.display = "none"; document.body.classList.remove("modal-open"); });
 
 function updateCountdown(){
   const el = $("countdown");
   if (!el) return;
   const now = new Date();
-  const nextMidnight = new Date();
-  nextMidnight.setHours(24,0,0,0);
-  const diff = nextMidnight - now;
+  const nextLocalMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0, 0);
+  const diff = nextLocalMidnight - now;
   const hours = Math.floor(diff / (1000*60*60));
-  const minutes = Math.floor((diff % (1000*60*60))/(1000*60));
+  const minutes = Math.floor((diff % (1000*60*60)) / (1000*60));
   el.innerText = `Next song unlocks in ${hours}h ${minutes}m`;
 }
 setInterval(updateCountdown, 1000); updateCountdown();
@@ -587,28 +658,7 @@ function enableGuessingUI(){
 }
 if (hasGameEndedToday()) disableGuessingUI(); else enableGuessingUI();
 
-// ===========================
-// ABOUT / PRIVACY MODALS (index.html variants)
-// ===========================
-(function wireAboutPrivacy(){
-  const aboutLink = document.getElementById("aboutLink");
-  const privacyLink = document.getElementById("privacyLink");
-
-  function openOverlayById(id){ const el = document.getElementById(id); if (!el) return; el.style.display = "flex"; document.body.classList.add("modal-open"); }
-  function closeOverlayById(id){ const el = document.getElementById(id); if (!el) return; el.style.display = "none"; document.body.classList.remove("modal-open"); }
-
-  if (aboutLink)  aboutLink.addEventListener("click",  (e)=>{ e.preventDefault(); openOverlayById("aboutOverlay"); });
-  if (privacyLink)privacyLink.addEventListener("click", (e)=>{ e.preventDefault(); openOverlayById("privacyOverlay"); });
-
-  document.addEventListener("click", (e) => {
-    if (e.target && e.target.id === "aboutCloseBtn")   closeOverlayById("aboutOverlay");
-    if (e.target && e.target.id === "privacyCloseBtn") closeOverlayById("privacyOverlay");
-    const aboutOv   = document.getElementById("aboutOverlay");
-    const privacyOv = document.getElementById("privacyOverlay");
-    if (e.target === aboutOv)   closeOverlayById("aboutOverlay");
-    if (e.target === privacyOv) closeOverlayById("privacyOverlay");
-  });
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape"){ closeOverlayById("aboutOverlay"); closeOverlayById("privacyOverlay"); }
-  });
-})();
+// Optional: Close overlays with ESC
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") { closeWinOverlay(); closeLossOverlay(); }
+});
