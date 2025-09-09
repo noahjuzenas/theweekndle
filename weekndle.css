@@ -126,3 +126,5 @@ body.modal-open { overflow: hidden; }
   text-decoration: underline;
   opacity: 1;
 }
+.overlay-card{max-height:90vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+#howToPlayOverlay .overlay-card{max-height:90vh;overflow-y:auto}
