@@ -1,5 +1,3 @@
-// weekndle.js — local-midnight deterministic random daily song + full game logic
-
 // ===========================
 // SONG DATABASE
 // ===========================
@@ -722,3 +720,34 @@ document.addEventListener("keydown", (e) => {
     }
   }
 });
+// Mobile header abbreviations (desktop unchanged)
+(function mobileHeaderLabels(){
+  const THRESH = 420; // px
+  const orig = {};
+  function abbrev(){
+    const thead = document.querySelector("#guessesTable thead");
+    if (!thead) return;
+    const ths = thead.querySelectorAll("th");
+    if (!ths.length) return;
+
+    // cache originals once
+    if (!orig.done){
+      ths.forEach((th,i)=>{ orig[i] = th.textContent; });
+      orig.done = true;
+    }
+
+    if (window.innerWidth <= THRESH){
+      // #, Song, Album, Track → Tr, Duration → Dur, Streams → Strm
+      if (ths[3]) ths[3].textContent = "Tr";
+      if (ths[4]) ths[4].textContent = "Dur";
+      if (ths[5]) ths[5].textContent = "Strm";
+    } else {
+      // restore full labels
+      ths.forEach((th,i)=>{ if (orig[i]) th.textContent = orig[i]; });
+    }
+  }
+  window.addEventListener("resize", abbrev);
+  window.addEventListener("orientationchange", abbrev);
+  // run once
+  abbrev();
+})();
