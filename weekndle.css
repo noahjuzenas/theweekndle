@@ -1,482 +1,212 @@
-
-/* Base */
-body {
-  font-family: Arial, sans-serif;
-  background-color: #111;
-  color: #fff;
-  margin: 0;
-  padding: 0;
-  text-align: center;
-}
-
-header {
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  border-bottom: 1px solid #333;
-}
-
-header h1 {
-  margin: 0;
-  text-align: center;
-  font-size: 3em;
-}
-
-.header-controls {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  margin-top: 10px;
-}
-
-input { padding: 8px; font-size: 16px; }
-
-button {
-  padding: 8px 12px;
-  font-size: 16px;
-  margin-left: 4px;
-  cursor: pointer;
-  background-color: #1db954;
-  border: none;
-  border-radius: 5px;
-  color: #fff;
-}
-
-/* Table */
-table { margin: 20px auto; border-collapse: collapse; width: 90%; }
-th, td { padding: 10px; border: 1px solid #333; text-align: center; font-weight: bold; vertical-align: middle; }
-th img, td img { vertical-align: middle; }
-
-.green { background-color: #4CAF50; color: #fff; }
-.yellow { background-color: #FFEB3B; color: #000; }
-.gray   { background-color: #555;    color: #fff; }
-
-/* Autocomplete */
-.autocomplete { position: relative; display: inline-block; }
-.autocomplete-items { position: absolute; border: 1px solid #555; z-index: 99; top: 100%; left: 0; right: 0; background: #111; max-height: 150px; overflow-y: auto; }
-.autocomplete-items div { padding: 8px; cursor: pointer; color: #fff; }
-.autocomplete-items div:hover { background-color: #333; }
-.autocomplete-active { background-color: #4CAF50 !important; color: #fff; }
-
-/* Overlays */
-.overlay { position: fixed; display: none; inset: 0; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 1000; }
-.overlay-card { background: #222; padding: 20px; border-radius: 10px; text-align: center; width: 300px; }
-.overlay-card img#albumCover, #lossAlbumCover { width: 80%; max-width: 400px; height: auto; display: block; margin: 15px auto; border-radius: 10px; }
-
-/* How To Play */
-#howToPlayOverlay .overlay-card { width: 960px; max-width: 95vw; padding: 30px; text-align: left; }
-.how-to-directions { margin-bottom: 20px; }
-.how-to-directions ul { padding-left: 20px; }
-.how-to-albums { display: flex; flex-wrap: nowrap; justify-content: center; gap: 10px; }
-.how-to-albums img { width: 60px; height: 60px; object-fit: cover; border-radius: 5px; border: 1px solid #333; }
-
-/* Guess Table layout stability */
-#guessesTable { table-layout: fixed; width: 90%; }
-#guessesTable th, #guessesTable td { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#guessesTable .col-guess { width: 4%; }
-#guessesTable .col-song { width: 36%; }
-#guessesTable .col-album { width: 30%; }
-#guessesTable .col-track { width: 8%; }
-#guessesTable .col-duration { width: 10%; }
-#guessesTable .col-streams { width: 12%; }
-#guessesTable th:first-child, #guessesTable td:first-child { padding-left: 4px; padding-right: 4px; }
-
-/* Album cell: big cover left + text */
-:root { --guess-row-h: 64px; }
-#guessesTable tbody tr { height: var(--guess-row-h); }
-#guessesTable td.album-cell { padding-top: 0; padding-bottom: 0; display: grid; grid-template-columns: var(--guess-row-h) 1fr; align-items: center; gap: 8px; padding-left: 0; }
-#guessesTable td.album-cell img { width: var(--guess-row-h); height: var(--guess-row-h); object-fit: cover; display: block; justify-self: start; margin-left: 0; }
-.album-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-@media (max-width: 480px) { :root { --guess-row-h: 52px; } }
-
-/* Guess distribution */
-.gd-heading { margin: 16px 0 8px; font-size: 1.1em; font-weight: 600; }
-#guessDist .gd-row { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
-#guessDist .gd-num { width: 20px; text-align: right; opacity: .8; }
-#guessDist .gd-bar { flex: 1; height: 14px; background: #333; border-radius: 6px; overflow: hidden; }
-#guessDist .gd-bar > div { height: 100%; background: #1db954; text-align: right; padding-right: 6px; font-size: 12px; line-height: 14px; }
-
-/* Highlight entire winning row */
-#guessesTable tr.win-row td { background-color: #4CAF50 !important; color: #fff !important; }
-
-/* Scroll lock when modal open */
-body.modal-open { overflow: hidden; }
-
-/* Footer links stack in bottom-right */
-#footerLinks {
-  position: fixed;
-  right: 14px;
-  bottom: 14px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
-  font-size: 14px;
-  z-index: 10;
-}
-
-#footerLinks a {
-  color: #aab8af;
-  text-decoration: none;
-  opacity: 0.9;
-}
-
-#footerLinks a:hover {
-  text-decoration: underline;
-  opacity: 1;
-}
-.overlay-card{max-height:90vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
-#howToPlayOverlay .overlay-card{max-height:90vh;overflow-y:auto}
-
-/* ---------- Design tokens (mobile-friendly) ---------- */
+/* ---------- Design tokens & layout constants ---------- */
 :root{
+  /* theme */
   --bg:#0b0b0b; --card:#151515; --text:#f2f2f2; --muted:#b8b8b8;
   --accent:#1db954; --accent-2:#2a2a2a;
+  /* radii & spacing */
   --radius:14px; --radius-sm:10px;
   --space-1:8px; --space-2:12px; --space-3:16px; --space-4:20px; --space-5:24px;
+  /* table row height (mobile overrides below) */
+  --guess-row-h: 64px;
 }
 
-/* Global text scale & breathing room */
+/* ---------- Base ---------- */
 html,body{background:var(--bg); color:var(--text);}
-body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif; line-height:1.4; padding: var(--space-3);}
-
-/* Headings scale with screen size */
-h1{font-weight:800; font-size: clamp(1.4rem, 3.5vw, 2.2rem); margin: var(--space-4) 0 var(--space-2);}
-h2{font-weight:700; font-size: clamp(1.2rem, 3vw, 1.6rem); margin: var(--space-3) 0 var(--space-1);}
-p,li,td,th,button,input{font-size: clamp(0.98rem, 2.8vw, 1.05rem);}
-
-/* ---------- Sticky, comfy guess bar ---------- */
-.guess-bar{
-  position: sticky; bottom: 0; left: 0; right: 0;
-  display: grid; grid-template-columns: 1fr auto auto; gap: var(--space-2);
+body{
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Inter, Arial, sans-serif;
+  line-height: 1.4;
+  margin: 0;
   padding: var(--space-3);
-  background: linear-gradient(180deg, rgba(11,11,11,0) 0%, rgba(11,11,11,0.9) 30%, rgba(11,11,11,1) 100%);
-  backdrop-filter: blur(4px);
-  border-top: 1px solid #1a1a1a;
-  z-index: 20;
+  text-align: center;
 }
-.guess-bar input{
-  width:100%; padding: 13px 14px; border-radius: var(--radius);
-  border: 1px solid var(--accent-2); background:#0e0e0e; color: var(--text);
-}
-.guess-bar button{
-  min-height:48px; padding: 0 var(--space-3);
-  border-radius: var(--radius); border: 1px solid var(--accent-2);
-  background:#171717; color:var(--text); font-weight:700; cursor:pointer;
-}
-.guess-bar #guessBtn{ background:var(--accent); color:#0a0a0a; border-color:transparent; }
-.guess-bar button:active{ transform: translateY(1px); }
 
-/* ---------- Autocomplete list (bigger tap targets) ---------- */
+/* Header */
+header{
+  padding: 20px;
+  display: flex; flex-direction: column; align-items: center;
+  border-bottom: 1px solid #333;
+}
+header h1{ margin: 0; text-align: center; font-size: clamp(1.4rem, 3.5vw, 2.2rem); }
+.header-controls{ display: flex; align-items: center; gap: 20px; margin-top: 10px; }
+
+/* Inputs & buttons */
+input{ padding: 8px; font-size: 16px; }
+button{
+  padding: 8px 12px; font-size: 16px; margin-left: 4px; cursor: pointer;
+  background-color: var(--accent); border: none; border-radius: 5px; color: #fff;
+}
+
+/* ---------- Table (desktop defaults) ---------- */
+table{ margin: 20px auto; border-collapse: collapse; width: 90%; }
+th, td{
+  padding: 10px; border: 1px solid #333; text-align: center; font-weight: bold; vertical-align: middle;
+}
+th img, td img{ vertical-align: middle; }
+
+/* Stable layout for the guesses table */
+#guessesTable{ table-layout: fixed; width: 90%; }
+#guessesTable th, #guessesTable td{ white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#guessesTable .col-guess   { width: 4%; }
+#guessesTable .col-song    { width: 36%; }
+#guessesTable .col-album   { width: 30%; }
+#guessesTable .col-track   { width: 8%; }
+#guessesTable .col-duration{ width: 10%; }
+#guessesTable .col-streams { width: 12%; }
+#guessesTable th:first-child, #guessesTable td:first-child{ padding-left: 4px; padding-right: 4px; }
+
+/* Album cell (cover + text) */
+#guessesTable tbody tr{ height: var(--guess-row-h); }
+#guessesTable td.album-cell{
+  padding-top: 0; padding-bottom: 0; padding-left: 0;
+  display: grid; grid-template-columns: var(--guess-row-h) 1fr; align-items: center; gap: 8px;
+}
+#guessesTable td.album-cell img{
+  width: var(--guess-row-h); height: var(--guess-row-h);
+  object-fit: cover; display: block; justify-self: start; margin-left: 0; border-radius: 10px;
+}
+.album-text{ flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ---------- Autocomplete ---------- */
+.autocomplete{ position: relative; display: inline-block; }
 .autocomplete-items{
-  position:absolute; z-index:30; background:#121212; border:1px solid #232323;
-  width: min(100%, 680px); max-height: 45vh; overflow:auto; border-radius: var(--radius);
-  box-shadow: 0 10px 30px rgba(0,0,0,.5); margin-top:6px;
+  position: absolute; z-index: 30; top: 100%; left: 0; right: 0;
+  background:#121212; border:1px solid #232323; max-height: 45vh; overflow:auto;
+  border-radius: var(--radius); box-shadow: 0 10px 30px rgba(0,0,0,.5); margin-top:6px;
 }
-.autocomplete-items > div{
-  padding: 14px var(--space-3); cursor:pointer; border-bottom:1px solid #1f1f1f;
+.autocomplete-items div{ padding: 14px var(--space-3); cursor: pointer; color: #fff; border-bottom: 1px solid #1f1f1f; }
+.autocomplete-items div:last-child{ border-bottom: 0; }
+.autocomplete-active{ background:#1c1c1c !important; color:#fff; }
+
+/* ---------- Feedback colors ---------- */
+td.green { background: rgba(0, 230, 38, 0.815); border-radius: 10px; color:#fff; }
+td.yellow{ background: rgba(239, 191, 17, 0.86);  border-radius: 10px; color:#111; }
+td.gray  { background: rgba(255,255,255,.06);     border-radius: 10px; color:#fff; }
+
+/* Highlight entire winning row */
+#guessesTable tr.win-row td{ background-color:#4CAF50 !important; color:#fff !important; }
+
+/* ---------- Overlays ---------- */
+.overlay{
+  position: fixed; display: none; inset: 0; background: rgba(0,0,0,0.85);
+  justify-content: center; align-items: center; z-index: 1000; padding: var(--space-3);
 }
-.autocomplete-items > div:last-child{ border-bottom:0; }
-.autocomplete-active{ background:#1c1c1c; }
-
-/* ---------- Table → Cards on small screens ---------- */
-#guessesTable{ width:100%; border-collapse: collapse; margin: var(--space-3) 0 var(--space-5); }
-#guessesTable th, #guessesTable td{ padding: 10px 12px; }
-
-/* Card layout for phones */
-@media (max-width: 700px){
-  #guessesTable thead{ display:none; }
-  #guessesTable, #guessesTable tbody, #guessesTable tr, #guessesTable td{
-    display:block; width:100%;
-  }
-  #guessesTable tr{
-    background: var(--card); border:1px solid #1d1d1d;
-    border-radius: var(--radius); padding: var(--space-2) var(--space-3);
-    margin: 0 0 var(--space-2); box-shadow: 0 6px 16px rgba(0,0,0,.25);
-  }
-  #guessesTable td{
-    display:grid; grid-template-columns: 128px 1fr; align-items:center;
-    padding: 6px 0; gap: var(--space-2);
-    border:0;
-  }
-  #guessesTable td::before{
-    content: attr(data-label);
-    color: var(--muted); font-weight:600; text-transform: uppercase; letter-spacing:.02em;
-    font-size: .85rem;
-  }
-  /* album cell image + text */
-  .album-cell{
-    display:flex; align-items:center; gap: var(--space-2);
-  }
-  .album-cell img{
-    width:48px; height:48px; object-fit:cover; border-radius: var(--radius-sm);
-    border:1px solid #242424;
-  }
-  .album-cell .album-text{ margin:0; line-height:1.2; }
-}
-
-/* ---------- Color chips remain clear on mobile ---------- */
-td.green{ background: rgba(0, 230, 38, 0.815); border-radius: 10px; }
-td.yellow{ background: rgba(239, 191, 17, 0.86); border-radius: 10px; }
-td.gray{ background: rgba(255,255,255,.06); border-radius: 10px; }
-
-/* ---------- Overlays look good on phones ---------- */
-.overlay{ padding: var(--space-3); }
 .overlay-card{
-  width: min(680px, 92vw); max-height: 90vh; overflow:auto; border-radius: var(--radius);
+  background:#222; color:#fff; text-align:center;
+  width: min(680px, 92vw); max-height: 90vh; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  padding: 20px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.6);
 }
-.overlay-card button{ min-height: 48px; border-radius: var(--radius); }
+img#albumCover, img#lossAlbumCover{
+  width: 80%; max-width: 400px; height: auto; display: block; margin: 15px auto; border-radius: 10px;
+}
 
-/* ---------- Utility spacing ---------- */
-.section{ margin: var(--space-4) 0; }
-.card{ background: var(--card); border:1px solid #1d1d1d; border-radius: var(--radius); padding: var(--space-3); }
-.muted{ color: var(--muted); }
+/* How To Play modal */
+#howToPlayOverlay .overlay-card{
+  width: 960px; max-width: 95vw; max-height: 90vh; overflow-y: auto; text-align: left; padding: 30px;
+}
+.how-to-directions{ margin-bottom: 20px; }
+.how-to-directions ul{ padding-left: 20px; }
+.how-to-albums{ display:flex; flex-wrap:nowrap; justify-content:center; gap:10px; }
+.how-to-albums img{ width:60px; height:60px; object-fit:cover; border-radius:5px; border:1px solid #333; }
 
-/* === Revert mobile layout to classic table (keep new style/fonts) === */
+/* Guess distribution */
+.gd-heading{ margin: 16px 0 8px; font-size: 1.1em; font-weight: 600; }
+#guessDist .gd-row{ display:flex; align-items:center; gap:8px; margin:4px 0; }
+#guessDist .gd-num{ width:20px; text-align:right; opacity:.8; }
+#guessDist .gd-bar{ flex:1; height:14px; background:#333; border-radius:6px; overflow:hidden; }
+#guessDist .gd-bar > div{ height:100%; background:#1db954; text-align:right; padding-right:6px; font-size:12px; line-height:14px; }
+
+/* Scroll lock when any modal is open */
+body.modal-open{ overflow: hidden; }
+
+/* Footer links (bottom-right stack) */
+#footerLinks{
+  position: fixed; right: 14px; bottom: 14px;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 4px;
+  font-size: 14px; z-index: 10;
+}
+#footerLinks a{ color:#aab8af; text-decoration:none; opacity:.9; }
+#footerLinks a:hover{ text-decoration: underline; opacity: 1; }
+
+/* ---------- Mobile adjustments (desktop unchanged) ---------- */
+
+/* Slightly smaller album row height on narrower phones */
+@media (max-width: 480px){ :root{ --guess-row-h: 52px; } }
+
+/* Mobile-only typography scaling */
 @media (max-width: 700px){
-  /* Show the table header again */
-  #guessesTable thead { 
-    display: table-header-group !important; 
+  html{ font-size: 13px !important; }
+  body, p, li, td, th, input, button{ font-size: 0.9rem !important; line-height: 1.25 !important; }
+  h1{ font-size: 1.2rem !important; margin: 12px 0 6px !important; }
+  h2{ font-size: 1.05rem !important; margin: 10px 0 6px !important; }
+
+  /* Compact table that still reads like desktop */
+  #guessesTable{ table-layout: fixed; width: 100%; margin: 12px auto; border-collapse: collapse; }
+  #guessesTable th{ font-size: 0.78rem !important; padding: 6px 6px !important; text-transform: uppercase; letter-spacing: .02em; }
+  #guessesTable td{ font-size: 0.86rem !important; padding: 6px 6px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* Artwork-only album column on phones */
+  .album-cell .album-text{
+    position: absolute !important; width:1px !important; height:1px !important;
+    margin:-1px !important; padding:0 !important; overflow:hidden !important;
+    clip: rect(0 0 0 0) !important; white-space: nowrap !important; border:0 !important;
+  }
+  td.album-cell{
+    display:grid !important; grid-template-columns: 1fr !important;
+    align-items:center !important; justify-items:center !important;
+    padding-top:4px !important; padding-bottom:4px !important;
+  }
+  td.album-cell img{
+    display:block !important; width:32px !important; height:32px !important;
+    object-fit:cover !important; border-radius:6px !important; border:1px solid #242424 !important;
   }
 
-  /* Force real table structure on phones */
-  #guessesTable { 
-    display: table !important; 
-    width: 90% !important;               /* matches your desktop width */
-    border-collapse: collapse !important; 
-    margin: 20px auto !important; 
-  }
-
-  /* === MOBILE: Yeezle-like compact table (desktop unchanged) === */
-@media (max-width: 700px){
-  /* tighten table without changing desktop styles */
-  #guessesTable{
-    table-layout: fixed;         /* keep columns stable */
-    width: 100%;
-    margin: 12px auto;
-    border-collapse: collapse;
-  }
-  #guessesTable th, #guessesTable td{
-    padding: 6px 4px;            /* less padding so everything fits */
-    font-size: 14px;             /* compact but readable */
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  #guessesTable th{
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: .02em;
-  }
-
-  /* mobile column widths tuned to fit */
-  #guessesTable .col-guess    { width: 6%  !important; }
-  #guessesTable .col-song     { width: 40% !important; }
-  #guessesTable .col-album    { width: 28% !important; }
-  #guessesTable .col-track    { width: 8%  !important; }
-  #guessesTable .col-duration { width: 10% !important; }
-  #guessesTable .col-streams  { width: 8%  !important; }
-
-  /* shrink album cell internals but keep the nice desktop styling pattern */
-  :root { --guess-row-h: 52px; }
-  #guessesTable tbody tr { height: var(--guess-row-h); }
-  #guessesTable td.album-cell{
-    display: grid;
-    grid-template-columns: 36px 1fr;  /* tiny cover + album text */
-    gap: 6px;
-    padding-top: 0; padding-bottom: 0;
-  }
-  #guessesTable td.album-cell img{
-    width: 32px; height: 32px; object-fit: cover; border-radius: 6px;
-  }
-  .album-text{ min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-
-  /* a bit more breathing room in the input area */
-  .autocomplete { display: block; width: 100%; max-width: 640px; margin: 0 auto; }
-  #guessInput { width: 100%; box-sizing: border-box; }
-}
-
-/* Hide the cover image on very narrow phones to free space */
-@media (max-width: 380px){
-  #guessesTable td.album-cell{
-    grid-template-columns: 1fr;  /* text only */
-  }
-  #guessesTable td.album-cell img{ display: none; }
-}
-
-/* Optional: if a device is extremely narrow, hide Streams column only on phones */
-@media (max-width: 340px){
-  /* header */
-  #guessesTable thead th:nth-child(6){ display:none; }
-  /* body cells */
-  #guessesTable tbody td:nth-child(6){ display:none; }
-}
-
-  #guessesTable tbody { display: table-row-group !important; }
-  #guessesTable tr { 
-    display: table-row !important; 
-    background: transparent !important; 
-    border: none !important;
-    box-shadow: none !important; 
-    padding: 0 !important; 
-    margin: 0 !important; 
-  }
-  #guessesTable th,
-  #guessesTable td {
-    display: table-cell !important; 
-    padding: 10px !important; 
-    border: 1px solid #333 !important;   /* use your classic borders */
-  }
-
-  /* Remove the pseudo-labels from the card layout */
-  #guessesTable td::before { content: none !important; }
-
-  /* Keep the nice album cell layout from desktop */
-  .album-cell{
-    display: grid !important;
-    grid-template-columns: var(--guess-row-h) 1fr !important;
-    align-items: center !important;
-    gap: 8px !important;
-  }
-  .album-cell img{
-    width: var(--guess-row-h) !important;
-    height: var(--guess-row-h) !important;
-    border: none !important;
-    border-radius: 10px !important;
-  }
-}
-
-/* =========================================
-   MOBILE-ONLY TYPOGRAPHY SHRINK (desktop unchanged)
-   Paste at END of weekndle.css
-   ========================================= */
-
-/* Base phones */
-@media (max-width: 700px){
-  /* Lower the root so all rems scale down */
-  html { font-size: 13px !important; }
-
-  /* General text */
-  body, p, li, td, th, input, button { 
-    font-size: 0.9rem !important;
-    line-height: 1.25 !important;
-  }
-
-  /* Headings */
-  h1 { font-size: 1.2rem !important; margin: 12px 0 6px !important; }
-  h2 { font-size: 1.05rem !important; margin: 10px 0 6px !important; }
-
-  /* Table */
-  #guessesTable { table-layout: fixed; width: 100%; }
-  #guessesTable th { font-size: 0.78rem !important; padding: 6px 6px !important; }
-  #guessesTable td { font-size: 0.86rem !important; padding: 6px 6px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .album-cell .album-text { font-size: 0.86rem !important; }
-
-  /* Guess UI */
-  #guessInput { font-size: 0.9rem !important; padding: 10px 12px !important; }
-  #guessBtn, #seeResultsBtn { font-size: 0.9rem !important; padding: 10px 12px !important; min-height: 38px !important; }
-
-  /* Autocomplete list items */
-  .autocomplete-items > div { font-size: 0.9rem !important; padding: 10px 12px !important; }
-
-  /* Overlays */
-  .overlay-card { font-size: 0.9rem !important; }
-  .overlay-card h2 { font-size: 1rem !important; }
+  /* Column rebalance to fit on phones */
+  #guessesTable .col-song     { width: 50% !important; }
+  #guessesTable .col-album    { width: 12% !important; }
+  #guessesTable .col-track    { width: 10% !important; }
+  #guessesTable .col-duration { width: 14% !important; }
+  #guessesTable .col-streams  { width: 14% !important; }
 }
 
 /* Small phones */
 @media (max-width: 480px){
-  html { font-size: 12px !important; }
-  #guessesTable th { font-size: 0.72rem !important; }
-  #guessesTable td, .album-cell .album-text { font-size: 0.8rem !important; }
-  #guessInput, #guessBtn, #seeResultsBtn { font-size: 0.85rem !important; }
+  html{ font-size: 12px !important; }
+  #guessesTable th{ font-size: 0.72rem !important; }
+  #guessesTable td, .album-cell .album-text{ font-size: 0.8rem !important; }
+  #guessInput, #guessBtn, #seeResultsBtn{ font-size: 0.85rem !important; }
 }
 
 /* Very small phones */
 @media (max-width: 400px){
-  html { font-size: 11px !important; }
-  #guessesTable th { font-size: 0.68rem !important; }
-  #guessesTable td, .album-cell .album-text { font-size: 0.76rem !important; }
-  #guessInput, #guessBtn, #seeResultsBtn { font-size: 0.8rem !important; }
+  html{ font-size: 11px !important; }
+  #guessesTable th{ font-size: 0.68rem !important; }
+  #guessesTable td, .album-cell .album-text{ font-size: 0.76rem !important; }
+  #guessInput, #guessBtn, #seeResultsBtn{ font-size: 0.8rem !important; }
 }
 
-/* Ultra narrow (edge cases) */
+/* Ultra narrow */
 @media (max-width: 360px){
-  html { font-size: 10px !important; }
-  #guessesTable th { font-size: 0.62rem !important; }
-  #guessesTable td, .album-cell .album-text { font-size: 0.72rem !important; }
-  #guessInput, #guessBtn, #seeResultsBtn { font-size: 0.76rem !important; }
+  html{ font-size: 10px !important; }
+  #guessesTable th{ font-size: 0.62rem !important; }
+  #guessesTable td, .album-cell .album-text{ font-size: 0.72rem !important; }
+  #guessInput, #guessBtn, #seeResultsBtn{ font-size: 0.76rem !important; }
 }
 
-/* Safety for the tiniest devices */
+/* Tiniest devices */
 @media (max-width: 320px){
-  html { font-size: 9px !important; }
-  #guessesTable th { font-size: 0.58rem !important; }
-  #guessesTable td, .album-cell .album-text { font-size: 0.68rem !important; }
-  #guessInput, #guessBtn, #seeResultsBtn { font-size: 0.72rem !important; }
+  html{ font-size: 9px !important; }
+  #guessesTable th{ font-size: 0.58rem !important; }
+  #guessesTable td, .album-cell .album-text{ font-size: 0.68rem !important; }
+  #guessInput, #guessBtn, #seeResultsBtn{ font-size: 0.72rem !important; }
 }
 
-/* =========================================
-   MOBILE: Album cell = artwork only
-   (desktop styles remain unchanged)
-   ========================================= */
-@media (max-width: 700px){
-  /* Hide the album text but keep it for screen readers */
-  .album-cell .album-text{
-    position: absolute !important;
-    width: 1px !important;
-    height: 1px !important;
-    margin: -1px !important;
-    padding: 0 !important;
-    overflow: hidden !important;
-    clip: rect(0 0 0 0) !important;
-    white-space: nowrap !important;
-    border: 0 !important;
-  }
-
-  /* Keep only the artwork visible and centered */
-  td.album-cell{
-    display: grid !important;
-    grid-template-columns: 1fr !important;
-    align-items: center !important;
-    justify-items: center !important;
-    padding-top: 4px !important;
-    padding-bottom: 4px !important;
-  }
-  td.album-cell img{
-    display: block !important;
-    width: 32px !important;       /* tweak to taste: 32–40px works well */
-    height: 32px !important;
-    object-fit: cover !important;
-    border-radius: 6px !important;
-    border: 1px solid #242424 !important;
-  }
-
-  /* Rebalance column widths so everything fits */
-  #guessesTable { table-layout: fixed; width: 100%; }
-  #guessesTable .col-song     { width: 50% !important; }  /* give Song more room */
-  #guessesTable .col-album    { width: 12% !important; }  /* artwork-only column */
-  #guessesTable .col-track    { width: 10% !important; }
-  #guessesTable .col-duration { width: 14% !important; }
-  #guessesTable .col-streams  { width: 14% !important; }
-
-  /* Compact cell text so no wrapping */
-  #guessesTable th, #guessesTable td{
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-  }
-}
-
-/* Ensure artwork stays visible even on the narrowest phones,
-   overriding any earlier rule that hid the image. */
+/* Make sure album art never gets hidden on very narrow phones */
 @media (max-width: 380px){
-  td.album-cell img{ display: block !important; }
+  td.album-cell img{ display:block !important; }
 }
 
-
-
-
-
+/* Optional: hide Streams on ultra-narrow phones to keep layout tidy */
+@media (max-width: 340px){
+  #guessesTable thead th:nth-child(6),
+  #guessesTable tbody td:nth-child(6){ display: none; }
+}
