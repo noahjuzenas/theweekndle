@@ -248,6 +248,72 @@ td.gray{ background: rgba(255,255,255,.06); border-radius: 10px; }
     border-collapse: collapse !important; 
     margin: 20px auto !important; 
   }
+
+  /* === MOBILE: Yeezle-like compact table (desktop unchanged) === */
+@media (max-width: 700px){
+  /* tighten table without changing desktop styles */
+  #guessesTable{
+    table-layout: fixed;         /* keep columns stable */
+    width: 100%;
+    margin: 12px auto;
+    border-collapse: collapse;
+  }
+  #guessesTable th, #guessesTable td{
+    padding: 6px 4px;            /* less padding so everything fits */
+    font-size: 14px;             /* compact but readable */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  #guessesTable th{
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .02em;
+  }
+
+  /* mobile column widths tuned to fit */
+  #guessesTable .col-guess    { width: 6%  !important; }
+  #guessesTable .col-song     { width: 40% !important; }
+  #guessesTable .col-album    { width: 28% !important; }
+  #guessesTable .col-track    { width: 8%  !important; }
+  #guessesTable .col-duration { width: 10% !important; }
+  #guessesTable .col-streams  { width: 8%  !important; }
+
+  /* shrink album cell internals but keep the nice desktop styling pattern */
+  :root { --guess-row-h: 52px; }
+  #guessesTable tbody tr { height: var(--guess-row-h); }
+  #guessesTable td.album-cell{
+    display: grid;
+    grid-template-columns: 36px 1fr;  /* tiny cover + album text */
+    gap: 6px;
+    padding-top: 0; padding-bottom: 0;
+  }
+  #guessesTable td.album-cell img{
+    width: 32px; height: 32px; object-fit: cover; border-radius: 6px;
+  }
+  .album-text{ min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+
+  /* a bit more breathing room in the input area */
+  .autocomplete { display: block; width: 100%; max-width: 640px; margin: 0 auto; }
+  #guessInput { width: 100%; box-sizing: border-box; }
+}
+
+/* Hide the cover image on very narrow phones to free space */
+@media (max-width: 380px){
+  #guessesTable td.album-cell{
+    grid-template-columns: 1fr;  /* text only */
+  }
+  #guessesTable td.album-cell img{ display: none; }
+}
+
+/* Optional: if a device is extremely narrow, hide Streams column only on phones */
+@media (max-width: 340px){
+  /* header */
+  #guessesTable thead th:nth-child(6){ display:none; }
+  /* body cells */
+  #guessesTable tbody td:nth-child(6){ display:none; }
+}
+
   #guessesTable tbody { display: table-row-group !important; }
   #guessesTable tr { 
     display: table-row !important; 
