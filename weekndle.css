@@ -418,6 +418,65 @@ td.gray{ background: rgba(255,255,255,.06); border-radius: 10px; }
   #guessInput, #guessBtn, #seeResultsBtn { font-size: 0.72rem !important; }
 }
 
+/* =========================================
+   MOBILE: Album cell = artwork only
+   (desktop styles remain unchanged)
+   ========================================= */
+@media (max-width: 700px){
+  /* Hide the album text but keep it for screen readers */
+  .album-cell .album-text{
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    margin: -1px !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    clip: rect(0 0 0 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+  }
+
+  /* Keep only the artwork visible and centered */
+  td.album-cell{
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    align-items: center !important;
+    justify-items: center !important;
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+  }
+  td.album-cell img{
+    display: block !important;
+    width: 36px !important;       /* tweak to taste: 32–40px works well */
+    height: 36px !important;
+    object-fit: cover !important;
+    border-radius: 6px !important;
+    border: 1px solid #242424 !important;
+  }
+
+  /* Rebalance column widths so everything fits */
+  #guessesTable { table-layout: fixed; width: 100%; }
+  #guessesTable .col-song     { width: 50% !important; }  /* give Song more room */
+  #guessesTable .col-album    { width: 12% !important; }  /* artwork-only column */
+  #guessesTable .col-track    { width: 10% !important; }
+  #guessesTable .col-duration { width: 14% !important; }
+  #guessesTable .col-streams  { width: 14% !important; }
+
+  /* Compact cell text so no wrapping */
+  #guessesTable th, #guessesTable td{
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+}
+
+/* Ensure artwork stays visible even on the narrowest phones,
+   overriding any earlier rule that hid the image. */
+@media (max-width: 380px){
+  td.album-cell img{ display: block !important; }
+}
+
+
 
 
 
