@@ -1,5 +1,3 @@
-// weekndle.js — local-midnight deterministic random daily song + full game logic
-
 // ===========================
 // SONG DATABASE
 // ===========================
@@ -402,6 +400,15 @@ function renderGuesses(){
 
     row.append(guessNumTd, titleTd, albumTd, trackTd, durationTd, streamsTd);
     tbody.appendChild(row);
+
+    // after you create the tds:
+    guessNumTd.dataset.label = "Guess";
+    titleTd.dataset.label = "Title";
+    albumTd.dataset.label = "Album";
+    trackTd.dataset.label = "Track #";
+    durationTd.dataset.label = "Duration";
+    streamsTd.dataset.label = "Streams";
+
   });
 }
 
