@@ -234,6 +234,54 @@ td.gray{ background: rgba(255,255,255,.06); border-radius: 10px; }
 .card{ background: var(--card); border:1px solid #1d1d1d; border-radius: var(--radius); padding: var(--space-3); }
 .muted{ color: var(--muted); }
 
+/* === Revert mobile layout to classic table (keep new style/fonts) === */
+@media (max-width: 700px){
+  /* Show the table header again */
+  #guessesTable thead { 
+    display: table-header-group !important; 
+  }
+
+  /* Force real table structure on phones */
+  #guessesTable { 
+    display: table !important; 
+    width: 90% !important;               /* matches your desktop width */
+    border-collapse: collapse !important; 
+    margin: 20px auto !important; 
+  }
+  #guessesTable tbody { display: table-row-group !important; }
+  #guessesTable tr { 
+    display: table-row !important; 
+    background: transparent !important; 
+    border: none !important;
+    box-shadow: none !important; 
+    padding: 0 !important; 
+    margin: 0 !important; 
+  }
+  #guessesTable th,
+  #guessesTable td {
+    display: table-cell !important; 
+    padding: 10px !important; 
+    border: 1px solid #333 !important;   /* use your classic borders */
+  }
+
+  /* Remove the pseudo-labels from the card layout */
+  #guessesTable td::before { content: none !important; }
+
+  /* Keep the nice album cell layout from desktop */
+  .album-cell{
+    display: grid !important;
+    grid-template-columns: var(--guess-row-h) 1fr !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+  .album-cell img{
+    width: var(--guess-row-h) !important;
+    height: var(--guess-row-h) !important;
+    border: none !important;
+    border-radius: 10px !important;
+  }
+}
+
 
 
 
