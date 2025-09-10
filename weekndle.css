@@ -348,6 +348,42 @@ td.gray{ background: rgba(255,255,255,.06); border-radius: 10px; }
   }
 }
 
+/* === MOBILE TYPOGRAPHY ONLY (keep desktop the same) === */
+@media (max-width: 700px){
+  /* Lower the root size so rems shrink uniformly */
+  html { font-size: 14px !important; }     /* desktop stays as-is */
+
+  /* General text */
+  body, p, li, td, th, input, button { 
+    font-size: 0.95rem !important; 
+    line-height: 1.3 !important;
+  }
+
+  /* Table */
+  #guessesTable th { font-size: 0.8rem !important; }
+  #guessesTable td { font-size: 0.9rem !important; }
+  .album-cell .album-text { font-size: 0.9rem !important; }
+
+  /* Guess UI */
+  #guessInput { font-size: 0.95rem !important; }
+  #guessBtn, #seeResultsBtn { font-size: 0.95rem !important; }
+
+  /* Autocomplete list items */
+  .autocomplete-items > div { font-size: 0.95rem !important; }
+
+  /* Overlays */
+  .overlay-card h2 { font-size: 1.05rem !important; }
+  .overlay-card, .overlay-card p, .overlay-card li { font-size: 0.95rem !important; }
+}
+
+/* Ultra-narrow phones get a tiny step down */
+@media (max-width: 360px){
+  html { font-size: 13px !important; }
+  #guessesTable th { font-size: 0.75rem !important; }
+  #guessesTable td { font-size: 0.85rem !important; }
+}
+
+
 
 
 
