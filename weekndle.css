@@ -83,7 +83,7 @@ td.yellow{ background: rgba(239, 191, 17, 0.86);  border-radius: 10px; color:#11
 td.gray  { background: rgba(255,255,255,.06);     border-radius: 10px; color:#fff; }
 
 /* Highlight entire winning row */
-#guessesTable tr.win-row td{ background-color:#4CAF50 !important; color:#fff !important; }
+#guessesTable tr.win-row td{ background: rgba(0, 230, 38, 0.815) !important; color:#fff !important; }
 
 /* ---------- Overlays ---------- */
 .overlay{
