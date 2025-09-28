@@ -154,7 +154,14 @@ const songs = [
   { title: "Hurry Up Tomorrow", album: "Hurry Up Tomorrow", track: 22, duration: 291, streams: 30000000, cover: "AlbumArts/HUT.jpg" },
 ];
 
-// Album order (for ±2 “yellow” logic)
+// ===========================
+// SONG DATABASE (leave your existing array here, unchanged)
+// ===========================
+// const songs = [ ... ]
+
+// ===========================
+// ALBUM ORDER (for ±2 “yellow” logic)
+// ===========================
 const albumOrderMap = {
   "House Of Balloons": 1,
   "Thursday": 2,
@@ -176,86 +183,43 @@ function formatDuration(seconds){ const m = Math.floor(seconds/60); const s = se
 function isTestMode(){ return new URLSearchParams(location.search).has("test"); }
 
 // ===========================
-// DAILY SONG (LOCAL MIDNIGHT + DETERMINISTIC RANDOM ORDER)
+// DAILY SONG (LOCAL MIDNIGHT + DETERMINISTIC ORDER)
 // ===========================
-
-// One canonical start date for the schedule (interpreted as the user's local date)
 const WEEKNDLE_START_DATE = "2025-09-01";
-
-// Change this seed to reshuffle the entire global schedule for everyone.
-// Keep it constant once you launch so the schedule stays stable.
 const WEEKNDLE_SEED = "weekndle_v1";
-
 const MS_PER_DAY = 86400000;
 
-// --- Local date → stable ordinal (increments exactly at local midnight; DST safe)
-function localOrdinalFromYMD(y, m0, d) {
-  // Use UTC epoch of the local Y/M/D to avoid timezone/DST drift in the ordinal math
-  return Math.floor(Date.UTC(y, m0, d) / MS_PER_DAY);
-}
-function localOrdinalToday() {
-  const now = new Date();
-  return localOrdinalFromYMD(now.getFullYear(), now.getMonth(), now.getDate());
-}
-function localOrdinalFromDateString(yyyyMmDd) {
-  const [y, m, d] = yyyyMmDd.split("-").map(Number);
-  return localOrdinalFromYMD(y, m - 1, d);
-}
+function localOrdinalFromYMD(y, m0, d) { return Math.floor(Date.UTC(y, m0, d) / MS_PER_DAY); }
+function localOrdinalToday() { const now = new Date(); return localOrdinalFromYMD(now.getFullYear(), now.getMonth(), now.getDate()); }
+function localOrdinalFromDateString(yyyyMmDd) { const [y, m, d] = yyyyMmDd.split("-").map(Number); return localOrdinalFromYMD(y, m - 1, d); }
 
-// --- Tiny deterministic PRNG (seeded)
 function xmur3(str){
   let h = 1779033703 ^ str.length;
-  for (let i = 0; i < str.length; i++) {
-    h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
-    h = (h << 13) | (h >>> 19);
-  }
-  return function(){
-    h = Math.imul(h ^ (h >>> 16), 2246822507);
-    h = Math.imul(h ^ (h >>> 13), 3266489909);
-    return (h ^= h >>> 16) >>> 0;
-  };
+  for (let i = 0; i < str.length; i++) { h = Math.imul(h ^ str.charCodeAt(i), 3432918353); h = (h << 13) | (h >>> 19); }
+  return function(){ h = Math.imul(h ^ (h >>> 16), 2246822507); h = Math.imul(h ^ (h >>> 13), 3266489909); return (h ^= h >>> 16) >>> 0; };
 }
 function mulberry32(a){
-  return function(){
-    let t = (a += 0x6D2B79F5);
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
+  return function(){ let t = (a += 0x6D2B79F5); t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
 }
+function seededPermutation(n, rng){ const arr = Array.from({ length: n }, (_, i) => i); for (let i=n-1;i>0;i--){ const j = Math.floor(rng()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
 
-// --- Deterministic Fisher–Yates using the seeded PRNG
-function seededPermutation(n, rng) {
-  const arr = Array.from({ length: n }, (_, i) => i);
-  for (let i = n - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
-
-// Build global permutation once per load (same on every device)
 const seedInt = xmur3(WEEKNDLE_SEED)();
 const rng = mulberry32(seedInt);
 const PERM = seededPermutation(songs.length, rng);
 
-// Map today's local day → a position in the permutation
-const today = localOrdinalToday(); // local-midnight day id
+const today = localOrdinalToday();
 const startDay = localOrdinalFromDateString(WEEKNDLE_START_DATE);
 const dayOffset = today - startDay;
-
-// Same song for everyone on the same local date; advances at local midnight
 const cycleIndex = ((dayOffset % songs.length) + songs.length) % songs.length;
 const target = songs[PERM[cycleIndex]];
 
 // ===========================
-// PERSISTED RESULT / LOCKS
+// RESULT / LOCK PERSISTENCE
 // ===========================
-const RESULT_DAY_KEY  = "weekndle_result_day";   // numeric day id when finished
+const RESULT_DAY_KEY  = "weekndle_result_day";   // numeric local day id when finished
 const RESULT_TYPE_KEY = "weekndle_result_type";  // "win" | "loss"
-const GAMEOVER_KEY    = "weekndle_game_over_day";// disables guessing for today
+const GAMEOVER_KEY    = "weekndle_game_over_day";
 
-// In test/reset modes, clear locks so dev can replay
 (function replaySafety(){
   const p = new URLSearchParams(location.search);
   if (p.has("test") || p.has("reset")){
@@ -264,18 +228,16 @@ const GAMEOVER_KEY    = "weekndle_game_over_day";// disables guessing for today
 })();
 
 function markResultToday(type){
-  if (isTestMode()) return; // don’t persist in test mode
+  if (isTestMode()) return;
   localStorage.setItem(RESULT_DAY_KEY, String(today));
   localStorage.setItem(RESULT_TYPE_KEY, type);
   localStorage.setItem(GAMEOVER_KEY, String(today));
 }
-
 function getTodayResult(){
   if (isTestMode()) return null;
   const d = parseInt(localStorage.getItem(RESULT_DAY_KEY), 10);
   return d === today ? localStorage.getItem(RESULT_TYPE_KEY) : null;
 }
-
 function hasGameEndedToday(){
   if (isTestMode()) return false;
   return parseInt(localStorage.getItem(GAMEOVER_KEY), 10) === today;
@@ -292,6 +254,7 @@ function saveStats(s){ s.winPct = s.plays > 0 ? Math.round((s.wins/s.plays)*100)
 function finalizeDay(result, guessesCount){
   if (hasGameEndedToday()) return;
   const s = loadStats();
+
   if (s.lastCompletedDay !== today){
     s.plays += 1;
     if (s.lastCompletedDay === today - 1) s.currentStreak = (result === "win") ? s.currentStreak + 1 : 0;
@@ -310,9 +273,47 @@ function finalizeDay(result, guessesCount){
 }
 
 // ===========================
-// GAME STATE
+// GAME STATE + GUESS PERSISTENCE
 // ===========================
 let guesses = [];
+const GUESSES_KEY = "weekndle_guesses";
+const GUESS_DAY_KEY = "weekndle_guess_day";
+
+// Clear stale guesses if the day changed; otherwise load and render them
+(function loadPersistedGuesses(){
+  if (isTestMode()) return;
+
+  const storedDay = parseInt(localStorage.getItem(GUESS_DAY_KEY), 10);
+  if (storedDay !== today){
+    localStorage.removeItem(GUESSES_KEY);
+    localStorage.setItem(GUESS_DAY_KEY, String(today));
+    guesses = [];
+    return;
+  }
+
+  try{
+    const raw = localStorage.getItem(GUESSES_KEY);
+    if (raw){
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        // Defensive: coerce only the fields we actually render
+        guesses = parsed.map(g => ({
+          guessSong: g.guessSong,
+          feedback: g.feedback
+        }));
+        renderGuesses();
+      }
+    }
+  } catch { guesses = []; }
+})();
+
+function persistGuesses(){
+  if (isTestMode()) return;
+  try{
+    localStorage.setItem(GUESSES_KEY, JSON.stringify(guesses));
+    localStorage.setItem(GUESS_DAY_KEY, String(today));
+  } catch {}
+}
 
 // ===========================
 // SUBMIT GUESS
@@ -341,6 +342,7 @@ function submitGuess(){
 
   guesses.push({ guessSong, feedback });
   renderGuesses();
+  persistGuesses();
 
   if (guessSong.title === target.title){
     finalizeDay("win", guesses.length);
@@ -451,10 +453,7 @@ autocomplete($("guessInput"), songs);
 // SHARE / DAY NUMBER
 // ===========================
 const COLOR_SQUARE = { green:"🟩", yellow:"🟨", gray:"⬛" };
-function getWeekndleNumber(){
-  const sd = localOrdinalFromDateString(WEEKNDLE_START_DATE);
-  return localOrdinalToday() - sd + 1;
-}
+function getWeekndleNumber(){ const sd = localOrdinalFromDateString(WEEKNDLE_START_DATE); return localOrdinalToday() - sd + 1; }
 function feedbackToSquare(cls){ return COLOR_SQUARE[cls] || "⬛"; }
 function buildShareText(){
   const dayNo = getWeekndleNumber();
@@ -559,7 +558,7 @@ function closeLossOverlay(){
   document.body.classList.remove("modal-open");
 }
 
-// Bind static overlay buttons (if present)
+// Bind static overlay buttons
 (function bindStaticButtons(){
   const shareWin = $("shareScoreBtn");
   if (shareWin) shareWin.addEventListener("click", shareScore);
@@ -659,7 +658,7 @@ function enableGuessingUI(){
 if (hasGameEndedToday()) disableGuessingUI(); else enableGuessingUI();
 
 // ===========================
-// ABOUT & PRIVACY MODALS
+// ABOUT & PRIVACY MODALS (if present in DOM)
 // ===========================
 (function wireAboutPrivacyModals(){
   function openOverlay(id){
@@ -675,79 +674,33 @@ if (hasGameEndedToday()) disableGuessingUI(); else enableGuessingUI();
     document.body.classList.remove("modal-open");
   }
 
-  // Openers (footer links)
   const aboutLink = document.getElementById("aboutLink");
   if (aboutLink){
-    aboutLink.addEventListener("click", (e) => {
-      e.preventDefault();
-      openOverlay("aboutOverlay");
-    });
+    aboutLink.addEventListener("click", (e) => { e.preventDefault(); openOverlay("aboutOverlay"); });
   }
   const privacyLink = document.getElementById("privacyLink");
   if (privacyLink){
-    privacyLink.addEventListener("click", (e) => {
-      e.preventDefault();
-      openOverlay("privacyOverlay");
-    });
+    privacyLink.addEventListener("click", (e) => { e.preventDefault(); openOverlay("privacyOverlay"); });
   }
 
-  // Document-level closers (works even if elements are added later)
   document.addEventListener("click", (e) => {
-    // Close buttons
     if (e.target && e.target.id === "aboutCloseBtn"){ closeOverlay("aboutOverlay"); }
     if (e.target && e.target.id === "privacyCloseBtn"){ closeOverlay("privacyOverlay"); }
-
-    // Backdrop click (clicking on the overlay itself)
     if (e.target && e.target.id === "aboutOverlay"){ closeOverlay("aboutOverlay"); }
     if (e.target && e.target.id === "privacyOverlay"){ closeOverlay("privacyOverlay"); }
   });
 
-  // Expose for ESC handler reuse
   window.__wknd_closeOverlay = closeOverlay;
 })();
-
 
 // Close any open overlays with ESC
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") {
-    // Game overlays
     if (typeof closeWinOverlay === "function") closeWinOverlay();
     if (typeof closeLossOverlay === "function") closeLossOverlay();
-    // About/Privacy (if present)
     if (window.__wknd_closeOverlay){
       __wknd_closeOverlay("aboutOverlay");
       __wknd_closeOverlay("privacyOverlay");
     }
   }
 });
-// Mobile header abbreviations (desktop unchanged)
-(function mobileHeaderLabels(){
-  const THRESH = 420; // px
-  const orig = {};
-  function abbrev(){
-    const thead = document.querySelector("#guessesTable thead");
-    if (!thead) return;
-    const ths = thead.querySelectorAll("th");
-    if (!ths.length) return;
-
-    // cache originals once
-    if (!orig.done){
-      ths.forEach((th,i)=>{ orig[i] = th.textContent; });
-      orig.done = true;
-    }
-
-    if (window.innerWidth <= THRESH){
-      // #, Song, Album, Track → Tr, Duration → Dur, Streams → Strm
-      if (ths[3]) ths[3].textContent = "Tr";
-      if (ths[4]) ths[4].textContent = "Dur";
-      if (ths[5]) ths[5].textContent = "Strm";
-    } else {
-      // restore full labels
-      ths.forEach((th,i)=>{ if (orig[i]) th.textContent = orig[i]; });
-    }
-  }
-  window.addEventListener("resize", abbrev);
-  window.addEventListener("orientationchange", abbrev);
-  // run once
-  abbrev();
-})();
