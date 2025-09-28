@@ -210,3 +210,11 @@ body.modal-open{ overflow: hidden; }
   #guessesTable thead th:nth-child(6),
   #guessesTable tbody td:nth-child(6){ display: none; }
 }
+/* Bigger song title in the Correct popup */
+#winSongTitle {
+  font-size: 2.2em;  
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 10px 0;
+}
+
