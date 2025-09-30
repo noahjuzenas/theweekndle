@@ -153,12 +153,6 @@ const songs = [
   { title: "Without A Warning", album: "Hurry Up Tomorrow", track: 21, duration: 297, streams: 32000000, cover: "AlbumArts/HUT.jpg" },
   { title: "Hurry Up Tomorrow", album: "Hurry Up Tomorrow", track: 22, duration: 291, streams: 30000000, cover: "AlbumArts/HUT.jpg" },
 ];
-
-// ===========================
-// SONG DATABASE (leave your existing array here, unchanged)
-// ===========================
-// const songs = [ ... ]
-
 // ===========================
 // ALBUM ORDER (for ±2 “yellow” logic)
 // ===========================
