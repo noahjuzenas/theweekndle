@@ -275,7 +275,7 @@ body::before {
 
 /* Card look with proper spacing/width and blur */
 #howToPlayOverlay .overlay-card {
-  width: min(780px, 92vw);
+  width: min(1000px, 95vw);
   background: linear-gradient(180deg, rgba(24,24,36,.96), rgba(14,14,24,.96));
   border: 1px solid rgba(255,255,255,.08);
   backdrop-filter: blur(8px);
